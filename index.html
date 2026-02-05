@@ -4,136 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hammad Mart Scanner</title>
-    <link rel="manifest" href="manifest.json">
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #22c55e; --text: #f1f5f9; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        /* Top Header */
-        .header { padding: 15px; background: var(--card); text-align: center; border-bottom: 2px solid var(--accent); z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .mart-name { font-size: 24px; font-weight: 800; color: var(--accent); margin: 0; letter-spacing: 1px; text-transform: uppercase; }
-        
-        /* Scanner Area */
-        .scanner-container { flex: 1; position: relative; background: black; }
-        #reader { width: 100% !important; height: 100% !important; border: none !important; }
-        
-        /* Result Popup */
-        .result-overlay { 
-            position: fixed; bottom: 0; left: 0; right: 0; top: 0;
-            background: rgba(15, 23, 42, 0.96); /* Dark background */
-            display: none; 
-            flex-direction: column; align-items: center; justify-content: center;
-            z-index: 20; padding: 20px;
-            animation: fadeIn 0.2s ease-out;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* BIG Image Style */
-        .prod-img { 
-            width: 75%; 
-            max-width: 280px; 
-            aspect-ratio: 1/1; 
-            border-radius: 20px; 
-            border: 4px solid var(--accent); 
-            object-fit: cover; 
-            background: white; 
-            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.2);
-            margin-bottom: 15px;
-        }
-
-        /* Names Styling */
-        .name-box { text-align: center; margin-bottom: 10px; width: 100%; }
-        
-        .p-en { font-size: 24px; font-weight: bold; color: white; margin-bottom: 5px; line-height: 1.2; }
-        .p-ur { font-size: 28px; color: var(--accent); font-family: 'Segoe UI', sans-serif; font-weight: 500; }
-
-        /* Price Styling */
-        .price-tag { font-size: 60px; font-weight: 900; color: white; margin: 5px 0; text-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
-        .unit-tag { font-size: 16px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
-
-        /* Button */
-        .btn-scan { 
-            width: 90%; max-width: 350px; background: var(--accent); color: white; border: none; 
-            padding: 18px; border-radius: 50px; font-size: 18px; font-weight: bold; 
-            box-shadow: 0 5px 20px rgba(34, 197, 94, 0.4); cursor: pointer;
-        }
-        
-        .mgr-link { position: absolute; bottom: 20px; color: #64748b; text-decoration: none; font-size: 12px; }
-
+        .header { padding: 15px; background: var(--card); display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .mart-name { font-size: 20px; font-weight: 800; color: var(--accent); margin: 0; text-transform: uppercase; }
+        .sync-btn { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .last-update { font-size: 10px; color: #94a3b8; text-align: right; padding: 5px 15px; }
+        .scanner-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #reader { width: 100% !important; max-width: 400px; border-radius: 20px; overflow: hidden; border: 4px solid var(--card) !important; }
+        #result { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .product-card { background: var(--card); width: 85%; max-width: 400px; border-radius: 25px; padding: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .product-img { width: 180px; height: 180px; object-fit: cover; border-radius: 20px; margin-bottom: 20px; border: 3px solid var(--accent); }
+        .p-en { font-size: 22px; font-weight: 700; color: var(--text); }
+        .p-ur { font-size: 26px; font-weight: 700; color: var(--accent); margin-top: 5px; }
+        .price-tag { font-size: 32px; font-weight: 800; background: var(--accent); display: inline-block; padding: 5px 25px; border-radius: 50px; margin: 20px 0; }
+        .close-btn { background: #ef4444; color: white; border: none; padding: 12px 40px; border-radius: 15px; font-size: 18px; font-weight: 700; width: 100%; cursor: pointer; }
+        .loader { border: 4px solid #1e293b; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1 class="mart-name">Hammad Mart</h1>
+        <button class="sync-btn" onclick="updateOfflineData()">
+            <i class="fas fa-sync-alt" id="sync-icon"></i> Update
+        </button>
     </div>
+    <div class="last-update" id="last-update">Data Status: Not Loaded</div>
 
     <div class="scanner-container">
         <div id="reader"></div>
+        <p style="margin-top: 20px; color: #64748b;">Scan item QR code</p>
     </div>
 
-    <div id="result" class="result-overlay">
-        
-        <img id="p-img" class="prod-img" src="" alt="Product Image">
-        
-        <div class="name-box">
-            <div class="p-en" id="p-en">Loading...</div>
-            <div class="p-ur" id="p-ur">...</div>
+    <div id="result">
+        <div id="loading-state" style="display: flex; flex-direction: column; align-items: center;">
+            <div class="loader"></div>
+            <p>Fetching Details...</p>
         </div>
-
-        <div class="price-tag" id="p-price">---</div>
-        <div class="unit-tag" id="p-unit"></div>
-        
-        <button class="btn-scan" onclick="resetScanner()">SCAN NEXT ITEM</button>
-        
-        <a href="https://hammad57.github.io/POS/manager.html" class="mgr-link">Open Manager</a>
+        <div id="data-state" class="product-card" style="display: none;">
+            <img id="p-img" class="product-img" src="" alt="Product">
+            <div id="p-ur" class="p-ur"></div>
+            <div id="p-en" class="p-en"></div>
+            <div class="price-tag" id="p-price"></div>
+            <div id="p-unit" style="margin-bottom: 20px; color: #94a3b8;"></div>
+            <button class="close-btn" onclick="resetScanner()">NEXT SCAN</button>
+        </div>
     </div>
 
     <script>
-        // AAPKA WEB APP URL (Version 5)
         const API = "https://script.google.com/macros/s/AKfycbx_QoHQzoG7laQkuFHNCKWpMn2z-yPcTak-OJ4AnnRcmCdGBgDRdKJUngwLimgKcoFu1Q/exec";
+        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
 
-        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250 });
-        
-        function onScanSuccess(decodedText) {
-            html5QrcodeScanner.clear();
-            
-            // Show result screen
-            document.getElementById('result').style.display = "flex";
-            document.getElementById('p-en').innerText = "Fetching Product...";
-            document.getElementById('p-ur').innerText = "";
-            document.getElementById('p-price').innerText = "...";
-            document.getElementById('p-img').src = "https://cdn.dribbble.com/users/765253/screenshots/2540865/loader.gif"; 
+        window.onload = () => {
+            const lastSync = localStorage.getItem('last_sync');
+            if(lastSync) document.getElementById('last-update').innerText = "Last Updated: " + lastSync;
+        };
 
-            fetch(`${API}?action=getDetails&id=${decodedText}`)
+        function updateOfflineData() {
+            const icon = document.getElementById('sync-icon');
+            icon.classList.add('fa-spin');
+            fetch(`${API}?action=read`)
                 .then(res => res.json())
                 .then(data => {
-                    if(!data.error) {
-                        // English Name
-                        document.getElementById('p-en').innerText = data.enName;
-                        // Urdu Name
-                        document.getElementById('p-ur').innerText = data.urName || ""; 
-                        
-                        document.getElementById('p-price').innerText = "Rs. " + data.price;
-                        document.getElementById('p-unit').innerText = data.unit || "Per Item";
-                        document.getElementById('p-img').src = data.img || "https://via.placeholder.com/400?text=No+Image";
-                    } else {
-                        document.getElementById('p-en').innerText = "Item Not Found";
-                        document.getElementById('p-price').innerText = "---";
-                        document.getElementById('p-img').src = "https://via.placeholder.com/400?text=Not+Found";
-                    }
+                    localStorage.setItem('mart_products', JSON.stringify(data));
+                    const now = new Date().toLocaleString();
+                    localStorage.setItem('last_sync', now);
+                    document.getElementById('last-update').innerText = "Last Updated: " + now;
+                    alert("✅ Data Updated Successfully!");
                 })
-                .catch(err => {
-                    document.getElementById('p-en').innerText = "Network Error";
-                });
+                .catch(() => alert("❌ Update Failed! Check Internet."))
+                .finally(() => icon.classList.remove('fa-spin'));
         }
 
-        function resetScanner() {
-            document.getElementById('result').style.display = "none";
-            location.reload();
+        function onScanSuccess(decodedText) {
+            html5QrcodeScanner.clear();
+            document.getElementById('result').style.display = "flex";
+            document.getElementById('loading-state').style.display = "flex";
+            document.getElementById('data-state').style.display = "none";
+
+            const localData = localStorage.getItem('mart_products');
+            const products = localData ? JSON.parse(localData) : [];
+            const item = products.find(p => p.id == decodedText);
+
+            setTimeout(() => {
+                if(item) showProduct(item);
+                else {
+                    fetch(`${API}?action=getDetails&id=${decodedText}`)
+                        .then(res => res.json())
+                        .then(data => data.error ? showNotFound() : showProduct({en:data.enName, ur:data.urName, price:data.price, unit:data.unit, img:data.img}))
+                        .catch(showNotFound);
+                }
+            }, 600);
         }
 
+        function showProduct(item) {
+            document.getElementById('loading-state').style.display = "none";
+            document.getElementById('data-state').style.display = "block";
+            document.getElementById('p-en').innerText = item.en || "No Name";
+            document.getElementById('p-ur').innerText = item.ur || "";
+            document.getElementById('p-price').innerText = "Rs. " + (item.price || "0");
+            document.getElementById('p-unit').innerText = item.unit || "Per Item";
+            document.getElementById('p-img').src = item.img || "https://via.placeholder.com/400?text=No+Image";
+        }
+
+        function showNotFound() {
+            document.getElementById('loading-state').style.display = "none";
+            document.getElementById('data-state').style.display = "block";
+            document.getElementById('p-en').innerText = "Item Not Found";
+            document.getElementById('p-ur').innerText = "";
+            document.getElementById('p-price').innerText = "---";
+            document.getElementById('p-img').src = "https://via.placeholder.com/400?text=Not+Found";
+        }
+
+        function resetScanner() { location.reload(); }
         html5QrcodeScanner.render(onScanSuccess);
     </script>
 </body>
