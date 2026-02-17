@@ -1,15 +1,57 @@
 {
-  "name": "Smart POS Scanner",
-  "short_name": "Scanner",
-  "start_url": "index.html",
+  "name": "Hammad Mart POS",
+  "short_name": "Mart POS",
+  "description": "Hammad Mart - Point of Sale System",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
+  "lang": "ur",
+  "categories": ["business", "shopping"],
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/241/241508.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/241/241508.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/241/241508.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/241/241508.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/241/241508.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Scanner",
+      "url": "./index.html",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/241/241508.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Orders",
+      "url": "./order.html",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/241/241508.png", "sizes": "96x96" }]
     }
   ]
 }
