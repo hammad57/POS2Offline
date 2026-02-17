@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
+    <title>Salers - Hammad Mart POS</title>
+
+    <!-- Firebase v8 (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --card2: #243447;
+            --accent: #22c55e;
+            --accent2: #16a34a;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --blue: #3b82f6;
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --border: #334155;
+            --nav-h: 65px;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            min-height: 100dvh;
+            padding-bottom: var(--nav-h);
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: sticky;
+            top: 0; z-index: 100;
+            background: var(--card);
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--accent);
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px; height: 38px;
+            background: var(--bg);
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .page-title { font-size: 17px; font-weight: 800; color: var(--accent); }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+        }
+        .tab {
+            flex: 1;
+            padding: 13px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background: rgba(34,197,94,0.05);
+        }
+
+        /* ===== FORM ===== */
+        .form-section { padding: 15px; }
+        .form-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .form-title {
+            font-size: 15px;
+            font-weight: 800;
+            margin: 0 0 16px;
+            color: var(--accent);
+        }
+
+        .form-group { margin-bottom: 13px; }
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            resize: none;
+        }
+        .form-input:focus { border-color: var(--accent); }
+        .form-input::placeholder { color: var(--muted); }
+
+        .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+        .loc-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .loc-btn:active { opacity: 0.8; transform: scale(0.97); }
+        .btn-gps { background: var(--blue); }
+        .btn-search { background: var(--orange); }
+
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: white;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .save-btn:active { opacity: 0.85; transform: scale(0.98); }
+        .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* ===== SALER LIST ===== */
+        .list-section { padding: 15px; }
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            font-size: 15px;
+            outline: none;
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: var(--accent); }
+
+        .saler-card {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .saler-name { font-size: 16px; font-weight: 800; margin: 0 0 10px; }
+        .saler-info { font-size: 13px; color: var(--muted); margin: 5px 0; display: flex; align-items: flex-start; gap: 6px; }
+        .saler-info strong { color: var(--text); min-width: 20px; }
+
+        .saler-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: opacity 0.2s;
+            text-decoration: none;
+        }
+        .action-btn:active { opacity: 0.8; }
+        .btn-call { background: var(--accent); }
+        .btn-map { background: var(--blue); }
+        .btn-del { background: var(--red); }
+        .btn-del-sm { background: var(--red); margin-left: auto; }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--muted);
+        }
+        .empty-icon { font-size: 56px; }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: var(--nav-h);
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: stretch;
+            z-index: 200;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            letter-spacing: 0.3px;
+        }
+        .nav-item .nav-icon { font-size: 22px; }
+        .nav-item.active { color: var(--accent); }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: calc(var(--nav-h) + 15px);
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--card);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 5000;
+            pointer-events: none;
+            border-left: 4px solid var(--accent);
+            white-space: nowrap;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .loader { text-align: center; padding: 30px; color: var(--muted); }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <a href="index.html" class="back-btn">←</a>
+        <div class="page-title">👥 سیلر ڈائریکٹری</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" id="tab-add" onclick="switchTab('add')">➕ نیا سیلر</div>
+        <div class="tab" id="tab-list" onclick="switchTab('list')">📋 تمام سیلر</div>
+    </div>
+
+    <!-- ADD FORM -->
+    <div id="view-add" class="form-section">
+        <div class="form-card">
+            <div class="form-title">📝 سیلر کی معلومات</div>
+
+            <div class="form-group">
+                <label class="form-label">اسٹور / سیلر کا نام *</label>
+                <input type="text" id="sName" class="form-input" placeholder="مثال: Al-Hamd Store">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">موبائل نمبر *</label>
+                <input type="tel" id="sMobile" class="form-input" placeholder="03xx-xxxxxxx" inputmode="tel">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">خریداری کا ریکارڈ</label>
+                <textarea id="sRecord" class="form-input" rows="2" placeholder="پرانی ہسٹری، واجبات..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">پتہ (Address)</label>
+                <textarea id="sAddress" class="form-input" rows="2" placeholder="علاقہ، شہر..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">گوگل میپ لنک</label>
+                <input type="text" id="sLocation" class="form-input" placeholder="لنک پیسٹ کریں یا بٹن استعمال کریں">
+                <div class="loc-grid">
+                    <button class="loc-btn btn-gps" onclick="fetchGPS()">📍 GPS Location</button>
+                    <button class="loc-btn btn-search" onclick="searchOnMap()">🔍 Maps پر تلاش</button>
+                </div>
+            </div>
+
+            <button id="saveBtn" class="save-btn" onclick="saveSaler()">
+                ✅ سیلر محفوظ کریں
+            </button>
+        </div>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div id="view-list" class="list-section hidden">
+        <input type="text" class="search-input" placeholder="🔍 نام سے تلاش کریں..." oninput="filterSalers(this.value)">
+
+        <div id="saler-list">
+            <div class="loader">⏳ لوڈ ہو رہا ہے...</div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">📷</span>
+            Scanner
+        </a>
+        <a href="order.html" class="nav-item">
+            <span class="nav-icon">🛒</span>
+            Orders
+        </a>
+        <a href="Saler.html" class="nav-item active">
+            <span class="nav-icon">👥</span>
+            Salers
+        </a>
+        <a href="manager.html" class="nav-item">
+            <span class="nav-icon">⚙️</span>
+            Admin
+        </a>
+    </nav>
+
+    <script>
+        // =========================================
+        // FIREBASE v8 INIT
+        // =========================================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ",
+            authDomain: "own-live-steam-web.firebaseapp.com",
+            databaseURL: "https://own-live-steam-web-default-rtdb.firebaseio.com",
+            projectId: "own-live-steam-web",
+            storageBucket: "own-live-steam-web.appspot.com",
+            messagingSenderId: "931557929949",
+            appId: "1:931557929949:web:e2b28c8644369e8f49646b"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+        const db = firebase.database();
+        const salersRef = db.ref('salers');
+
+        // =========================================
+        // TOAST
+        // =========================================
+        let toastTimer;
+        function showToast(msg, duration = 2500) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), duration);
+        }
+
+        // =========================================
+        // TABS
+        // =========================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('view-add').classList.toggle('hidden', tab !== 'add');
+            document.getElementById('view-list').classList.toggle('hidden', tab !== 'list');
+        }
+
+        // =========================================
+        // SAVE SALER
+        // =========================================
+        function saveSaler() {
+            const name = document.getElementById('sName').value.trim();
+            const mobile = document.getElementById('sMobile').value.trim();
+            if (!name) { showToast('❌ نام لازمی ہے'); document.getElementById('sName').focus(); return; }
+            if (!mobile) { showToast('❌ موبائل نمبر لازمی ہے'); document.getElementById('sMobile').focus(); return; }
+
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ محفوظ ہو رہا ہے...';
+
+            const data = {
+                name,
+                mobile,
+                record: document.getElementById('sRecord').value.trim(),
+                address: document.getElementById('sAddress').value.trim(),
+                location: document.getElementById('sLocation').value.trim(),
+                timestamp: Date.now()
+            };
+
+            salersRef.push(data)
+                .then(() => {
+                    showToast('✅ سیلر محفوظ ہو گیا!');
+                    clearForm();
+                })
+                .catch(() => showToast('❌ Error! Check connection'))
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '✅ سیلر محفوظ کریں';
+                });
+        }
+
+        function clearForm() {
+            ['sName', 'sMobile', 'sRecord', 'sAddress', 'sLocation'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        // =========================================
+        // LOAD SALERS (Real-time)
+        // =========================================
+        let allSalers = [];
+
+        salersRef.orderByChild('timestamp').on('value', snap => {
+            allSalers = [];
+            if (snap.exists()) {
+                snap.forEach(child => {
+                    allSalers.push({ key: child.key, ...child.val() });
+                });
+                allSalers.reverse(); // Newest first
+            }
+            renderSalers(allSalers);
+        });
+
+        function renderSalers(list) {
+            const el = document.getElementById('saler-list');
+            if (list.length === 0) {
+                el.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">👤</div>
+                        <p style="margin:10px 0 0; font-size:14px;">کوئی سیلر نہیں ملا</p>
+                    </div>`;
+                return;
+            }
+
+            el.innerHTML = list.map(s => `
+                <div class="saler-card">
+                    <div class="saler-name">🏪 ${escapeHTML(s.name)}</div>
+                    <div class="saler-info"><strong>📞</strong> ${escapeHTML(s.mobile)}</div>
+                    ${s.record ? `<div class="saler-info"><strong>📦</strong> ${escapeHTML(s.record)}</div>` : ''}
+                    ${s.address ? `<div class="saler-info"><strong>🏠</strong> ${escapeHTML(s.address)}</div>` : ''}
+                    <div class="saler-actions">
+                        <a href="tel:${s.mobile}" class="action-btn btn-call">📞 Call</a>
+                        ${s.location ? `<a href="${s.location}" target="_blank" class="action-btn btn-map">📍 Map</a>` : ''}
+                        <button onclick="deleteSaler('${s.key}')" class="action-btn btn-del btn-del-sm">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterSalers(query) {
+            const q = query.toLowerCase().trim();
+            if (!q) { renderSalers(allSalers); return; }
+            const filtered = allSalers.filter(s =>
+                s.name.toLowerCase().includes(q) ||
+                s.mobile.includes(q) ||
+                (s.address && s.address.toLowerCase().includes(q))
+            );
+            renderSalers(filtered);
+        }
+
+        function deleteSaler(key) {
+            if (confirm('یہ سیلر حذف کریں؟')) {
+                salersRef.child(key).remove()
+                    .then(() => showToast('✅ حذف ہو گیا'))
+                    .catch(() => showToast('❌ Error'));
+            }
+        }
+
+        // =========================================
+        // GPS & MAP
+        // =========================================
+        function fetchGPS() {
+            if (!navigator.geolocation) { showToast('❌ GPS support نہیں ہے'); return; }
+            showToast('📍 Location حاصل ہو رہی ہے...');
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const link = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    document.getElementById('sLocation').value = link;
+                    showToast('✅ GPS Location مل گئی!');
+                },
+                () => showToast('❌ GPS Error - Permission check کریں')
+            );
+        }
+
+        function searchOnMap() {
+            const name = document.getElementById('sName').value;
+            const addr = document.getElementById('sAddress').value;
+            const q = encodeURIComponent((name + ' ' + addr).trim());
+            window.open(`https://www.google.com/maps/search/${q}`, '_blank');
+            showToast('ℹ️ Maps پر تلاش کریں، لنک کاپی کریں');
+        }
+
+        // =========================================
+        // HELPERS
+        // =========================================
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
