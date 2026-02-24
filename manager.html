@@ -12,7 +12,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" defer></script>
 
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -21,35 +20,32 @@
             --text: #f1f5f9; --muted: #94a3b8; --blue: #3b82f6;
             --red: #ef4444; --orange: #f59e0b; --border: #334155;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; }
         
-        /* Loader */
-        .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: var(--blue); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .header { position: sticky; top: 0; z-index: 100; background: var(--card); padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--blue); }
+        .header { position: sticky; top: 0; z-index: 100; background: var(--card); padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--blue); }
         .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .stat-card { background: var(--card); border-radius: 12px; padding: 15px; border-bottom: 3px solid var(--blue); }
+        .stat-card { background: var(--card); border-radius: 12px; padding: 15px; border-bottom: 3px solid var(--blue); text-align: center; }
         
-        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 58px; z-index: 90; }
+        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); }
         .tab { padding: 15px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; flex: 1; text-align: center; }
         .tab.active { color: var(--blue); border-bottom: 3px solid var(--blue); background: rgba(59,130,246,0.1); }
         
         .section { padding: 15px; }
         .hidden { display: none !important; }
         
-        .card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
-        .input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 12px; outline: none; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; color: white; }
+        .card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; outline: none; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
-        .prod-card { background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; border-left: 4px solid var(--blue); animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .prod-card { background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--blue); }
+        .badge { padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; margin-right: 5px; background: var(--border); }
         
-        .badge { padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; margin-right: 5px; display: inline-block; margin-top: 5px; }
-        
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: var(--card); display: flex; border-top: 1px solid var(--border); z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; font-size: 10px; }
+        .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: var(--blue); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: var(--card); display: flex; border-top: 1px solid var(--border); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 600; }
         .nav-item.active { color: var(--blue); }
     </style>
 </head>
@@ -57,64 +53,56 @@
 
     <div id="loader" class="loader-overlay">
         <div class="spinner"></div>
-        <p id="loader-msg" style="margin-top:15px; font-weight: 600;">Loading Cloud Data...</p>
+        <p style="margin-top:15px; font-weight:bold;">Syncing Sheet Data...</p>
     </div>
 
     <div class="header">
-        <a href="index.html" style="color:white; text-decoration:none; font-size:22px;">←</a>
-        <div style="font-weight:800; color:var(--blue); letter-spacing: 1px;">HAMMAD MART ADMIN</div>
-        <div></div>
+        <a href="index.html" style="color:white; text-decoration:none; font-size:24px;">←</a>
+        <div style="font-weight:800; color:var(--blue);">ADMIN PANEL</div>
+        <div style="width:24px;"></div>
     </div>
 
     <div class="dashboard">
         <div class="stat-card">
             <div id="stat-total" style="font-size:20px; font-weight:800;">0</div>
-            <div style="font-size:10px; color:var(--muted);">TOTAL PRODUCTS</div>
+            <div style="font-size:10px; color:var(--muted);">TOTAL ITEMS</div>
         </div>
         <div class="stat-card">
             <div id="stat-profit" style="font-size:20px; font-weight:800; color:var(--accent);">0</div>
-            <div style="font-size:10px; color:var(--muted);">POTENTIAL PROFIT</div>
+            <div style="font-size:10px; color:var(--muted);">EXP. PROFIT</div>
         </div>
     </div>
 
     <div class="tabs">
-        <div id="tab-list" class="tab active" onclick="switchTab('list')">📦 STOCK</div>
+        <div id="tab-list" class="tab active" onclick="switchTab('list')">📦 LIST</div>
         <div id="tab-add" class="tab" onclick="switchTab('add')">➕ ADD</div>
         <div id="tab-sync" class="tab" onclick="switchTab('sync')">🔄 SYNC</div>
     </div>
 
     <div id="sec-list" class="section">
-        <input type="text" id="adminSearch" class="input" placeholder="🔍 Search by Name or ID..." oninput="filterProducts(this.value)">
+        <input type="text" id="adminSearch" class="input" placeholder="🔍 Search by Name or Barcode..." oninput="filterProducts()">
         <div id="product-container"></div>
     </div>
 
     <div id="sec-add" class="section hidden">
         <div class="card">
-            <h3 style="margin-top:0; color:var(--blue);">Manual Entry</h3>
-            <input type="text" id="p-id" class="input" placeholder="Product ID / Barcode">
-            <input type="text" id="p-en" class="input" placeholder="English Name">
-            <input type="text" id="p-ur" class="input" placeholder="Urdu Name" style="direction:rtl;">
-            <div style="display:flex; gap:10px;">
-                <input type="number" id="p-buy" class="input" placeholder="Buy Price (D)">
-                <input type="number" id="p-sale" class="input" placeholder="Sale Price (E)">
-            </div>
-            <button class="btn" style="background:var(--accent);" onclick="saveLocal()">✅ SAVE TO LOCAL STORAGE</button>
+            <input type="text" id="p-id" class="input" placeholder="Barcode ID">
+            <input type="text" id="p-en" class="input" placeholder="Product Name (English)">
+            <input type="text" id="p-ur" class="input" placeholder="Product Name (Urdu)" style="direction:rtl;">
+            <input type="number" id="p-buy" class="input" placeholder="Purchase Price (Col D)">
+            <input type="number" id="p-sale" class="input" placeholder="Sale Price (Col E)">
+            <button class="btn" style="background:var(--accent);" onclick="saveProductLocally()">✅ SAVE LOCALLY</button>
         </div>
     </div>
 
     <div id="sec-sync" class="section hidden">
         <div class="card" style="text-align:center;">
-            <div style="font-size:40px; margin-bottom:10px;">☁️</div>
-            <h3>Cloud Synchronization</h3>
-            <p style="font-size:12px; color:var(--muted); margin-bottom:20px;">
-                Google Sheet se data load karein.<br>
-                Column D: Purchase Price | Column E: Sale Price
-            </p>
-            <button class="btn" style="background:var(--orange);" onclick="syncWithCloud()">SYNC NOW</button>
-            <p id="sync-time" style="font-size:10px; color:var(--muted); margin-top:15px;">Never synced</p>
+            <h3 style="margin-top:0;">Cloud Sync</h3>
+            <p id="sync-status" style="font-size:12px; color:var(--muted);">Last Sync: Never</p>
+            <button class="btn" style="background:var(--orange);" onclick="fetchFromSheet()">🔄 FETCH FROM GOOGLE SHEET</button>
         </div>
-        <button class="btn" style="background:var(--blue); margin-bottom:10px;" onclick="downloadBarcodes()">📄 DOWNLOAD BARCODES PDF</button>
-        <button class="btn" style="background:transparent; border:1px solid var(--red); color:var(--red); margin-top:20px;" onclick="resetApp()">⚠️ RESET ALL DATA</button>
+        <button class="btn" style="background:var(--blue); margin-bottom:10px;" onclick="generatePDF()">📄 DOWNLOAD BARCODES PDF</button>
+        <button class="btn" style="background:transparent; border:1.5px solid var(--red); color:var(--red); margin-top:20px;" onclick="clearAllData()">⚠️ RESET ALL DATA</button>
     </div>
 
     <nav class="bottom-nav">
@@ -126,85 +114,77 @@
     <canvas id="barcodeCanvas" style="display:none;"></canvas>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzX73LEA1QPzu_n-oikZH46w3sK8XLx_teqF3UrpobrKMADJHifzyDOKJTC0As8ys6o/exec";
+        // Aapki Google Sheet API Link
+        const SHEET_API = "https://script.google.com/macros/s/AKfycbzX73LEA1QPzu_n-oikZH46w3sK8XLx_teqF3UrpobrKMADJHifzyDOKJTC0As8ys6o/exec";
         let allProducts = [];
 
-        // Tab Switching
-        function switchTab(tab) {
+        function switchTab(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('sec-' + tab).classList.remove('hidden');
-            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('sec-' + id).classList.remove('hidden');
+            document.getElementById('tab-' + id).classList.add('active');
         }
 
-        // Initialize Data
-        function init() {
-            const saved = localStorage.getItem('mart_data');
+        function loadLocal() {
+            const data = localStorage.getItem('mart_data');
             const time = localStorage.getItem('mart_data_time');
-            if(saved) {
-                allProducts = JSON.parse(saved);
-                if(time) document.getElementById('sync-time').textContent = "Last Sync: " + new Date(parseInt(time)).toLocaleString();
-            }
+            allProducts = data ? JSON.parse(data) : [];
+            if(time) document.getElementById('sync-status').textContent = "Last Sync: " + new Date(parseInt(time)).toLocaleString();
             updateUI();
         }
 
         function updateUI() {
-            // Stats
             document.getElementById('stat-total').textContent = allProducts.length;
             let profit = 0;
-            allProducts.forEach(p => {
-                profit += (parseFloat(p.price || 0) - parseFloat(p.buyPrice || 0));
-            });
+            allProducts.forEach(p => profit += (parseFloat(p.price || 0) - parseFloat(p.buyPrice || 0)));
             document.getElementById('stat-profit').textContent = "Rs " + profit.toLocaleString();
-            
             renderList(allProducts);
         }
 
         function renderList(list) {
             const container = document.getElementById('product-container');
-            if(list.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--muted);">No products found. Sync from Cloud.</div>`;
+            if(!list || list.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color:gray; margin-top:50px;'>No data found. Sync from sheet.</p>";
                 return;
             }
             container.innerHTML = list.map(p => `
                 <div class="prod-card">
                     <div style="flex:1">
-                        <div style="font-weight:800;">${p.en || p.id}</div>
-                        <div style="font-size:11px; color:var(--muted);">${p.ur || ''} (ID: ${p.id})</div>
-                        <div>
-                            <span class="badge" style="background:#334155; color:#cbd5e1;">Buy: ${p.buyPrice}</span>
-                            <span class="badge" style="background:rgba(34,197,94,0.15); color:var(--accent);">Sale: ${p.price}</span>
+                        <div style="font-weight:800; font-size:14px;">${p.en || 'No Name'}</div>
+                        <div style="font-size:11px; color:var(--muted);">ID: ${p.id}</div>
+                        <div style="margin-top:5px;">
+                            <span class="badge" style="color:var(--muted)">B: ${p.buyPrice}</span>
+                            <span class="badge" style="color:var(--accent); background:rgba(34,197,94,0.1)">S: ${p.price}</span>
                         </div>
                     </div>
-                    <button onclick="deleteProd('${p.id}')" style="background:none; border:none; color:var(--red); font-size:20px; padding:10px;">🗑️</button>
+                    <button onclick="deleteProduct('${p.id}')" style="background:none; border:none; color:var(--red); font-size:20px;">🗑️</button>
                 </div>
             `).join('');
         }
 
-        function filterProducts(val) {
-            const q = val.toLowerCase().trim();
+        function filterProducts() {
+            const q = document.getElementById('adminSearch').value.toLowerCase().trim();
             const filtered = allProducts.filter(p => 
-                (p.en && p.en.toLowerCase().includes(q)) || (String(p.id).includes(q))
+                (p.en && p.en.toLowerCase().includes(q)) || 
+                String(p.id).includes(q)
             );
             renderList(filtered);
         }
 
-        // CLOUD SYNC - Using your working file's logic
-        function syncWithCloud() {
+        // GOOGLE SHEET SYNC (Using XMLHttpRequest like your working file)
+        function fetchFromSheet() {
             document.getElementById('loader').style.display = 'flex';
-            
             const xhr = new XMLHttpRequest();
-            // action=read aur cache bust ke liye timestamp
-            xhr.open("GET", API_URL + "?action=read&t=" + Date.now(), true);
+            xhr.open("GET", SHEET_API + "?action=read&t=" + Date.now(), true);
             
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     document.getElementById('loader').style.display = 'none';
                     if (xhr.status === 200) {
                         try {
-                            const data = JSON.parse(xhr.responseText);
-                            // Column Mapping: 0=ID, 1=EN, 2=UR, 3=Buy(D), 4=Sale(E)
-                            allProducts = data.map(row => ({
+                            const raw = JSON.parse(xhr.responseText);
+                            // Mapping: A=ID, B=EN, C=UR, D=Buy, E=Sale
+                            allProducts = raw.map(row => ({
                                 id: String(row[0] || ""),
                                 en: String(row[1] || ""),
                                 ur: String(row[2] || ""),
@@ -215,11 +195,11 @@
                             localStorage.setItem('mart_data', JSON.stringify(allProducts));
                             localStorage.setItem('mart_data_time', Date.now().toString());
                             
-                            init();
-                            alert("✅ Sync Complete! " + allProducts.length + " items loaded.");
+                            alert("✅ " + allProducts.length + " items synced successfully!");
+                            loadLocal();
                             switchTab('list');
                         } catch(e) {
-                            alert("❌ Error parsing data. Check Google Script JSON output.");
+                            alert("❌ Error: Could not parse sheet data.");
                         }
                     } else {
                         alert("❌ Server Error: " + xhr.status);
@@ -228,44 +208,43 @@
             };
             xhr.onerror = function() {
                 document.getElementById('loader').style.display = 'none';
-                alert("❌ Network Error. Check Internet.");
+                alert("❌ Connection failed!");
             };
             xhr.send();
         }
 
-        function saveLocal() {
+        function saveProductLocally() {
             const id = document.getElementById('p-id').value.trim();
-            const sale = document.getElementById('p-sale').value;
-            if(!id || !sale) return alert("ID and Sale Price are required!");
-
+            if(!id) return alert("Barcode is required!");
+            
             const newProd = {
                 id: id,
                 en: document.getElementById('p-en').value,
                 ur: document.getElementById('p-ur').value,
                 buyPrice: parseFloat(document.getElementById('p-buy').value) || 0,
-                price: parseFloat(sale) || 0
+                price: parseFloat(document.getElementById('p-sale').value) || 0
             };
 
-            const index = allProducts.findIndex(p => p.id === id);
-            if(index > -1) allProducts[index] = newProd;
+            const idx = allProducts.findIndex(p => p.id === id);
+            if(idx > -1) allProducts[idx] = newProd;
             else allProducts.unshift(newProd);
 
             localStorage.setItem('mart_data', JSON.stringify(allProducts));
             updateUI();
-            alert("✅ Saved Locally!");
+            alert("✅ Product saved locally!");
             switchTab('list');
         }
 
-        function deleteProd(id) {
-            if(confirm("Delete this item?")) {
+        function deleteProduct(id) {
+            if(confirm("Delete this product?")) {
                 allProducts = allProducts.filter(p => p.id != id);
                 localStorage.setItem('mart_data', JSON.stringify(allProducts));
                 updateUI();
             }
         }
 
-        function downloadBarcodes() {
-            if(allProducts.length === 0) return alert("No products found!");
+        function generatePDF() {
+            if(allProducts.length === 0) return alert("No data to export!");
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const canvas = document.getElementById('barcodeCanvas');
@@ -282,17 +261,18 @@
                 if (x > 180) { x = 10; y += 30; }
                 if (y > 270) { doc.addPage(); y = 15; x = 10; }
             });
-            doc.save('HammadMart_Barcodes.pdf');
+            doc.save('Inventory_Barcodes.pdf');
         }
 
-        function resetApp() {
-            if(confirm("This will wipe all data! Continue?")) {
-                localStorage.clear();
+        function clearAllData() {
+            if(confirm("Wipe all local data? This cannot be undone.")) {
+                localStorage.removeItem('mart_data');
+                localStorage.removeItem('mart_data_time');
                 location.reload();
             }
         }
 
-        window.onload = init;
+        window.onload = loadLocal;
     </script>
 </body>
 </html>
