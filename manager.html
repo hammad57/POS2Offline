@@ -17,80 +17,81 @@
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
-            --bg: #0f172a; --card: #1e293b; --card2: #243447;
-            --accent: #22c55e; --text: #f1f5f9; --muted: #94a3b8;
-            --blue: #3b82f6; --red: #ef4444; --orange: #f59e0b;
-            --border: #334155; --nav-h: 65px;
+            --bg: #0f172a; --card: #1e293b; --accent: #22c55e;
+            --text: #f1f5f9; --muted: #94a3b8; --blue: #3b82f6;
+            --red: #ef4444; --orange: #f59e0b; --border: #334155;
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; }
         .header { position: sticky; top: 0; z-index: 100; background: var(--card); padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--blue); }
         .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         .stat-card { background: var(--card); border-radius: 12px; padding: 15px; border-bottom: 3px solid var(--blue); }
         .stat-val { font-size: 18px; font-weight: 800; }
-        .tabs { display: flex; background: var(--card); overflow-x: auto; border-bottom: 1px solid var(--border); }
+        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); }
         .tab { padding: 15px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; flex: 1; text-align: center; }
         .tab.active { color: var(--blue); border-bottom: 3px solid var(--blue); background: rgba(59,130,246,0.1); }
         .section { padding: 15px; }
         .hidden { display: none !important; }
         .card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
-        .input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; }
+        .input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; outline: none; }
+        .input:focus { border-color: var(--blue); }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; color: white; margin-top: 5px; }
         .prod-card { background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; border-left: 4px solid var(--blue); }
         .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 5px; }
-        .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: var(--nav-h); background: var(--card); display: flex; border-top: 1px solid var(--border); }
+        .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: var(--card); display: flex; border-top: 1px solid var(--border); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; font-size: 10px; }
         .nav-item.active { color: var(--blue); }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div id="loader" class="loader-overlay">
         <div style="width:40px;height:40px;border:4px solid #334155;border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;"></div>
-        <p>Syncing Data...</p>
+        <p style="margin-top:15px;">Syncing Products...</p>
     </div>
 
     <div class="header">
         <a href="index.html" style="color:white; text-decoration:none; font-size:20px;">←</a>
-        <div style="font-weight:800; color:var(--blue);">⚙️ ADMIN PANEL</div>
+        <div style="font-weight:800; color:var(--blue);">Hammad Mart - ADMIN</div>
         <div></div>
     </div>
 
     <div class="dashboard">
-        <div class="stat-card"><div id="stat-total" class="stat-val">0</div><div style="font-size:10px;">ITEMS</div></div>
-        <div class="stat-card"><div id="stat-profit" class="stat-val">0</div><div style="font-size:10px;">EXP. PROFIT</div></div>
+        <div class="stat-card"><div id="stat-total" class="stat-val">0</div><div style="font-size:10px; color:var(--muted);">STOCK ITEMS</div></div>
+        <div class="stat-card"><div id="stat-profit" class="stat-val">0</div><div style="font-size:10px; color:var(--muted);">TOTAL PROFIT</div></div>
     </div>
 
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('list', this)">📦 LIST</div>
-        <div class="tab" onclick="switchTab('add', this)">➕ ADD</div>
-        <div class="tab" onclick="switchTab('tools', this)">🛠️ TOOLS</div>
+        <div id="t-list" class="tab active" onclick="switchTab('list')">📦 LIST</div>
+        <div id="t-add" class="tab" onclick="switchTab('add')">➕ ADD</div>
+        <div id="t-tools" class="tab" onclick="switchTab('tools')">🛠️ SYNC</div>
     </div>
 
     <div id="sec-list" class="section">
-        <input type="text" id="adminSearch" class="input" placeholder="🔍 Search Name or ID..." oninput="filterProducts(this.value)">
+        <input type="text" id="adminSearch" class="input" placeholder="🔍 Search Product Name..." oninput="filterProducts(this.value)">
         <div id="product-container"></div>
     </div>
 
     <div id="sec-add" class="section hidden">
         <div class="card">
-            <input type="text" id="p-id" class="input" placeholder="Barcode / ID">
+            <input type="text" id="p-id" class="input" placeholder="Barcode ID">
             <input type="text" id="p-en" class="input" placeholder="English Name">
             <input type="text" id="p-ur" class="input" placeholder="Urdu Name" style="direction:rtl;">
-            <input type="number" id="p-buy" class="input" placeholder="Purchase Price (Col D)">
-            <input type="number" id="p-sale" class="input" placeholder="Sale Price (Col E)">
-            <button class="btn" style="background:var(--accent);" onclick="saveNewProduct()">✅ SAVE LOCALLY</button>
+            <input type="number" id="p-buy" class="input" placeholder="Purchase Price (Column D)">
+            <input type="number" id="p-sale" class="input" placeholder="Sale Price (Column E)">
+            <button class="btn" style="background:var(--accent);" onclick="saveNewProduct()">SAVE TO STOCK</button>
         </div>
     </div>
 
     <div id="sec-tools" class="section hidden">
         <div class="card" style="text-align:center;">
-            <h3 style="color:var(--orange);">Google Sheet Sync</h3>
-            <p id="last-sync" style="font-size:11px; color:var(--muted);">Last Sync: Never</p>
-            <button class="btn" style="background:var(--orange);" onclick="syncData()">🔄 SYNC NOW</button>
+            <h3>Google Sheet Sync</h3>
+            <p id="last-sync" style="font-size:11px; color:var(--muted); margin-bottom:15px;">Last Sync: Never</p>
+            <button class="btn" style="background:var(--orange);" onclick="syncData()">🔄 SYNC DATA FROM SHEET</button>
         </div>
-        <button class="btn" style="background:var(--blue);" onclick="generateBarcodePDF()">📄 DOWNLOAD BARCODES</button>
-        <button class="btn" style="background:var(--red); margin-top:20px;" onclick="clearCache()">⚠️ RESET ALL DATA</button>
+        <button class="btn" style="background:var(--blue);" onclick="generateBarcodePDF()">📄 EXPORT BARCODES PDF</button>
+        <button class="btn" style="background:var(--red); margin-top:30px; opacity:0.6;" onclick="clearCache()">⚠️ CLEAR APP CACHE</button>
     </div>
 
     <nav class="bottom-nav">
@@ -105,21 +106,19 @@
         const SHEET_API = "https://script.google.com/macros/s/AKfycbzX73LEA1QPzu_n-oikZH46w3sK8XLx_teqF3UrpobrKMADJHifzyDOKJTC0As8ys6o/exec";
         let allProducts = [];
 
-        function switchTab(id, el) {
+        function switchTab(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById('sec-' + id).classList.remove('hidden');
-            el.classList.add('active');
+            document.getElementById('t-' + id).classList.add('active');
         }
 
         function loadLocalData() {
-            try {
-                const data = localStorage.getItem('mart_data');
-                const time = localStorage.getItem('mart_data_time');
-                allProducts = data ? JSON.parse(data) : [];
-                if(time) document.getElementById('last-sync').textContent = "Last Sync: " + new Date(parseInt(time)).toLocaleString();
-                updateUI();
-            } catch(e) { console.error("Load Error", e); }
+            const data = localStorage.getItem('mart_data');
+            const time = localStorage.getItem('mart_data_time');
+            allProducts = data ? JSON.parse(data) : [];
+            if(time) document.getElementById('last-sync').textContent = "Last Sync: " + new Date(parseInt(time)).toLocaleString();
+            updateUI();
         }
 
         function updateUI() {
@@ -133,17 +132,17 @@
         function renderList(list) {
             const container = document.getElementById('product-container');
             if(!list || list.length === 0) {
-                container.innerHTML = "<p style='text-align:center; color:gray;'>No data found. Please Sync.</p>";
+                container.innerHTML = "<p style='text-align:center; margin-top:40px; color:gray;'>No data available.</p>";
                 return;
             }
             container.innerHTML = list.map(p => `
                 <div class="prod-card">
                     <div style="flex:1">
-                        <div style="font-weight:800; font-size:14px;">${p.en || 'No Name'}</div>
+                        <div style="font-weight:800; font-size:14px;">${p.en || p.id}</div>
                         <div style="font-size:11px; color:var(--muted);">ID: ${p.id}</div>
                         <div style="margin-top:5px;">
-                            <span class="badge" style="background:#334155">B: ${p.buyPrice}</span>
-                            <span class="badge" style="background:rgba(34,197,94,0.2); color:var(--accent)">S: ${p.price}</span>
+                            <span class="badge" style="background:#334155">Buy: ${p.buyPrice || 0}</span>
+                            <span class="badge" style="background:rgba(34,197,94,0.15); color:var(--accent)">Sale: ${p.price || 0}</span>
                         </div>
                     </div>
                     <button onclick="deleteProduct('${p.id}')" style="background:none; border:none; color:var(--red); font-size:18px;">🗑️</button>
@@ -152,70 +151,96 @@
         }
 
         function filterProducts(val) {
-            const q = val.toLowerCase();
-            const filtered = allProducts.filter(p => p.en.toLowerCase().includes(q) || String(p.id).includes(q));
+            const q = val.toLowerCase().trim();
+            const filtered = allProducts.filter(p => (p.en || '').toLowerCase().includes(q) || String(p.id).includes(q));
             renderList(filtered);
         }
 
         async function syncData() {
-            const loader = document.getElementById('loader');
-            loader.style.display = 'flex';
+            document.getElementById('loader').style.display = 'flex';
             try {
-                const response = await fetch(SHEET_API + "?action=read");
-                const rawData = await response.json();
+                // Fetch data with cache bust
+                const res = await fetch(SHEET_API + "?action=read&t=" + Date.now());
+                const rawData = await res.json();
                 
-                // MAPPING logic - checking if data exists
-                if(rawData && Array.isArray(rawData)) {
-                    allProducts = rawData.map(row => ({
+                if(!rawData || !Array.isArray(rawData)) {
+                    throw new Error("Invalid Data Format");
+                }
+
+                // Map data: A=0(ID), B=1(EN), C=2(UR), D=3(Buy), E=4(Sale)
+                // Filter out header row if exists
+                const mapped = rawData.map(row => {
+                    return {
                         id: String(row[0] || ""),
                         en: String(row[1] || ""),
                         ur: String(row[2] || ""),
-                        buyPrice: parseFloat(row[3]) || 0, // Column D
-                        price: parseFloat(row[4]) || 0      // Column E
-                    })).filter(p => p.id !== "");
+                        buyPrice: parseFloat(row[3]) || 0,
+                        price: parseFloat(row[4]) || 0
+                    };
+                }).filter(p => p.id !== "" && p.id.toLowerCase() !== "id");
 
-                    localStorage.setItem('mart_data', JSON.stringify(allProducts));
-                    localStorage.setItem('mart_data_time', Date.now().toString());
-                    
-                    alert("✅ Sync Successful! " + allProducts.length + " items loaded.");
-                    loadLocalData();
-                    switchTab('list', document.querySelectorAll('.tab')[0]);
-                }
-            } catch (error) {
-                alert("❌ Sync Failed! Check internet or API link.");
-                console.error(error);
+                allProducts = mapped;
+                localStorage.setItem('mart_data', JSON.stringify(allProducts));
+                localStorage.setItem('mart_data_time', Date.now().toString());
+                
+                loadLocalData();
+                alert("✅ Success! " + allProducts.length + " Items Loaded.");
+                switchTab('list');
+            } catch (err) {
+                console.error(err);
+                alert("❌ SYNC FAILED!\n1. Check Internet\n2. Check Google Script Link");
             } finally {
-                loader.style.display = 'none';
+                document.getElementById('loader').style.display = 'none';
             }
         }
 
         function saveNewProduct() {
             const id = document.getElementById('p-id').value;
-            const en = document.getElementById('p-en').value;
             const sale = document.getElementById('p-sale').value;
-            if(!id || !sale) return alert("ID and Sale Price are must!");
+            if(!id || !sale) return alert("ID and Sale Price Required!");
 
             const newObj = {
-                id: id, en: en, ur: document.getElementById('p-ur').value,
+                id: id,
+                en: document.getElementById('p-en').value,
+                ur: document.getElementById('p-ur').value,
                 buyPrice: parseFloat(document.getElementById('p-buy').value) || 0,
                 price: parseFloat(sale) || 0
             };
+
             allProducts.unshift(newObj);
             localStorage.setItem('mart_data', JSON.stringify(allProducts));
             updateUI();
-            alert("✅ Saved Locally!");
+            alert("✅ Saved!");
         }
 
         function deleteProduct(id) {
-            if(confirm("Delete item?")) {
+            if(confirm("Remove this item?")) {
                 allProducts = allProducts.filter(p => p.id != id);
                 localStorage.setItem('mart_data', JSON.stringify(allProducts));
                 updateUI();
             }
         }
 
+        function generateBarcodePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const canvas = document.getElementById('barcodeCanvas');
+            let x = 10, y = 15;
+            allProducts.forEach(p => {
+                doc.setFontSize(7);
+                doc.text(`${p.en} - Rs.${p.price}`, x+2, y);
+                try {
+                    JsBarcode(canvas, String(p.id), { format:'CODE128', height:30, displayValue:false });
+                    doc.addImage(canvas.toDataURL(), 'PNG', x, y+2, 50, 15);
+                } catch(e){}
+                x += 65; if (x > 180) { x = 10; y += 30; }
+                if (y > 270) { doc.addPage(); y = 15; x = 10; }
+            });
+            doc.save('Inventory.pdf');
+        }
+
         function clearCache() {
-            if(confirm("Everything will be deleted! Are you sure?")) {
+            if(confirm("All local data will be deleted. Continue?")) {
                 localStorage.clear();
                 location.reload();
             }
@@ -223,6 +248,5 @@
 
         window.onload = loadLocalData;
     </script>
-    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 </body>
 </html>
