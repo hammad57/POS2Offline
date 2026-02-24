@@ -6,303 +6,72 @@
     <meta name="theme-color" content="#0f172a">
     <title>آرڈر - Hammad Mart POS</title>
 
-    <!-- Firebase v8 (Compat) - Same as index.html -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="firebase-config.js"></script>
 
-    <!-- Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --card2: #243447;
-            --accent: #22c55e;
-            --accent2: #16a34a;
-            --text: #f1f5f9;
-            --muted: #94a3b8;
-            --blue: #3b82f6;
-            --red: #ef4444;
-            --orange: #f59e0b;
-            --border: #334155;
-            --nav-h: 65px;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            min-height: 100dvh;
-            padding-bottom: var(--nav-h);
-        }
-
-        /* ===== HEADER ===== */
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: var(--card);
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 2px solid var(--accent);
-        }
-        .back-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 38px; height: 38px;
-            background: var(--bg);
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-        .page-title {
-            font-size: 17px;
-            font-weight: 800;
-            color: var(--accent);
-        }
-
-        /* ===== FORM CARD ===== */
-        .form-card {
-            margin: 15px;
-            background: var(--card);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        .form-title {
-            font-size: 16px;
-            font-weight: 800;
-            margin: 0 0 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
+        :root { --bg: #0f172a; --card: #1e293b; --card2: #243447; --accent: #22c55e; --accent2: #16a34a; --text: #f1f5f9; --muted: #94a3b8; --blue: #3b82f6; --red: #ef4444; --orange: #f59e0b; --border: #334155; --nav-h: 65px; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100dvh; padding-bottom: var(--nav-h); }
+        .header { position: sticky; top: 0; z-index: 100; background: var(--card); padding: 12px 15px; display: flex; align-items: center; gap: 12px; border-bottom: 2px solid var(--accent); }
+        .back-btn { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: var(--bg); border-radius: 10px; text-decoration: none; font-size: 18px; flex-shrink: 0; }
+        .page-title { font-size: 17px; font-weight: 800; color: var(--accent); }
+        .form-card { margin: 15px; background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .form-title { font-size: 16px; font-weight: 800; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
         .form-group { margin-bottom: 14px; }
-        .form-label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .form-input {
-            width: 100%;
-            padding: 13px 15px;
-            border-radius: 10px;
-            border: 1.5px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+        .form-label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+        .form-input { width: 100%; padding: 13px 15px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; outline: none; }
         .form-input:focus { border-color: var(--accent); }
-
-        .save-btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            color: white;
-            font-size: 16px;
-            font-weight: 800;
-            cursor: pointer;
-            margin-top: 5px;
-            transition: opacity 0.2s, transform 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .save-btn:active { opacity: 0.85; transform: scale(0.98); }
-        .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        /* ===== ORDER LIST ===== */
+        .save-btn { width: 100%; padding: 15px; border: none; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; font-size: 16px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; gap: 8px; }
         .list-section { padding: 0 15px 15px; }
-
-        .list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
+        .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .list-title { font-size: 16px; font-weight: 800; }
         .btn-row { display: flex; gap: 8px; align-items: center; }
-
-        .btn-sm {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            color: white;
-            transition: opacity 0.2s, transform 0.1s;
-        }
-        .btn-sm:active { opacity: 0.8; transform: scale(0.97); }
-        .btn-blue { background: var(--blue); }
-        .btn-red-s { background: var(--red); }
-        .btn-orange { background: var(--orange); }
-
-        /* Table */
-        .table-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.25);
-        }
+        .btn-sm { padding: 8px 12px; border: none; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; color: white; }
+        .btn-blue { background: var(--blue); } .btn-red-s { background: var(--red); } .btn-orange { background: var(--orange); }
+        .table-card { background: white; border-radius: 12px; overflow: hidden; }
         .order-table { width: 100%; border-collapse: collapse; color: #1e293b; }
-        .order-table th {
-            background: #e2e8f0;
-            padding: 12px 10px;
-            font-size: 12px;
-            font-weight: 700;
-            text-align: left;
-            color: #475569;
-            text-transform: uppercase;
-        }
-        .order-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 14px;
-            vertical-align: middle;
-        }
-        .order-table tr:last-child td { border-bottom: none; }
-        .order-table tr:hover td { background: #f8fafc; }
-
-        .qty-badge {
-            display: inline-block;
-            background: #ede9fe;
-            color: #7c3aed;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .del-btn {
-            background: var(--red);
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
+        .order-table th { background: #e2e8f0; padding: 12px 10px; font-size: 12px; text-align: left; }
+        .order-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .qty-badge { background: #ede9fe; color: #7c3aed; padding: 4px 10px; border-radius: 12px; font-weight: 700; }
+        .del-btn { background: var(--red); color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
         .checkbox-cell { text-align: center; }
-        input[type="checkbox"] {
-            width: 16px; height: 16px;
-            cursor: pointer;
-            accent-color: var(--accent);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--muted);
-        }
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
         .empty-icon { font-size: 48px; }
-
-        /* ===== BOTTOM NAV ===== */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: var(--nav-h);
-            background: var(--card);
-            border-top: 1px solid var(--border);
-            display: flex;
-            align-items: stretch;
-            z-index: 200;
-            padding-bottom: env(safe-area-inset-bottom, 0px);
-        }
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            letter-spacing: 0.3px;
-        }
-        .nav-item .nav-icon { font-size: 22px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); background: var(--card); display: flex; z-index: 200; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 600; }
         .nav-item.active { color: var(--accent); }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed;
-            bottom: calc(var(--nav-h) + 15px);
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: var(--card);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            opacity: 0;
-            transition: all 0.3s;
-            z-index: 5000;
-            pointer-events: none;
-            border-left: 4px solid var(--accent);
-            white-space: nowrap;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
+        .toast { position: fixed; bottom: calc(var(--nav-h) + 15px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; border-left: 4px solid var(--accent); transition: all 0.3s; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-        /* Loading */
-        .loader { text-align: center; padding: 30px; color: var(--muted); font-size: 14px; }
+        .loader { text-align: center; padding: 30px; color: var(--muted); }
     </style>
 </head>
 <body>
 
     <div id="toast" class="toast"></div>
 
-    <!-- Header -->
     <div class="header">
         <a href="index.html" class="back-btn">←</a>
         <div class="page-title">🛒 نیا آرڈر</div>
     </div>
 
-    <!-- Add Order Form -->
     <div class="form-card">
         <div class="form-title">📝 آرڈر شامل کریں</div>
-
         <div class="form-group">
             <label class="form-label">چیز کا نام (Item Name)</label>
             <input type="text" id="itemName" class="form-input" placeholder="مثال: چینی، آٹا، دال..." autocomplete="off">
         </div>
-
         <div class="form-group">
             <label class="form-label">تعداد (Quantity)</label>
             <input type="number" id="itemQty" class="form-input" placeholder="مثال: 2، 5، 10..." min="1" inputmode="numeric">
         </div>
-
-        <button id="saveBtn" class="save-btn" onclick="saveOrder()">
-            🛒 آرڈر محفوظ کریں
-        </button>
+        <button id="saveBtn" class="save-btn" onclick="saveOrder()">🛒 آرڈر محفوظ کریں</button>
     </div>
 
-    <!-- Order List -->
     <div class="list-section">
         <div class="list-header">
             <div class="list-title">📋 آرڈر لسٹ</div>
@@ -317,9 +86,7 @@
             <table class="order-table">
                 <thead>
                     <tr>
-                        <th class="checkbox-cell" style="width:40px;">
-                            <input type="checkbox" id="selectAll" onchange="toggleAll(this)">
-                        </th>
+                        <th class="checkbox-cell" style="width:40px;"><input type="checkbox" id="selectAll" onchange="toggleAll(this)"></th>
                         <th>آئٹم</th>
                         <th style="text-align:center;">تعداد</th>
                         <th style="text-align:center; width:60px;">Del</th>
@@ -332,63 +99,26 @@
         </div>
     </div>
 
-    <!-- Bottom Nav -->
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="nav-icon">📷</span>
-            Scanner
-        </a>
-        <a href="index.html#orders" class="nav-item">
-            <span class="nav-icon">📦</span>
-            Orders
-        </a>
-        <a href="order.html" class="nav-item active">
-            <span class="nav-icon">🛒</span>
-            New Order
-        </a>
-        <a href="Saler.html" class="nav-item">
-            <span class="nav-icon">👥</span>
-            Salers
-        </a>
-        <a href="manager.html" class="nav-item">
-            <span class="nav-icon">⚙️</span>
-            Admin
-        </a>
+        <a href="index.html" class="nav-item"><span class="nav-icon">📷</span>Scanner</a>
+        <a href="index.html#orders" class="nav-item"><span class="nav-icon">📦</span>Orders</a>
+        <a href="order.html" class="nav-item active"><span class="nav-icon">🛒</span>New Order</a>
+        <a href="Saler.html" class="nav-item"><span class="nav-icon">👥</span>Salers</a>
+        <a href="manager.html" class="nav-item"><span class="nav-icon">⚙️</span>Admin</a>
     </nav>
 
     <script>
-        // =========================================
-        // FIREBASE v8 INIT
-        // =========================================
-        const FIREBASE_CONFIG = {
-            apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ",
-            authDomain: "own-live-steam-web.firebaseapp.com",
-            databaseURL: "https://own-live-steam-web-default-rtdb.firebaseio.com",
-            projectId: "own-live-steam-web",
-            storageBucket: "own-live-steam-web.appspot.com",
-            messagingSenderId: "931557929949",
-            appId: "1:931557929949:web:e2b28c8644369e8f49646b"
-        };
-
-        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-        const db = firebase.database();
+        // Use db from firebase-config.js
         const ordersRef = db.ref('orders');
 
-        // =========================================
-        // TOAST
-        // =========================================
         let toastTimer;
         function showToast(msg, duration = 2500) {
             const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
+            t.textContent = msg; t.classList.add('show');
             clearTimeout(toastTimer);
             toastTimer = setTimeout(() => t.classList.remove('show'), duration);
         }
 
-        // =========================================
-        // SAVE ORDER
-        // =========================================
         function saveOrder() {
             const name = document.getElementById('itemName').value.trim();
             const qty = document.getElementById('itemQty').value.trim();
@@ -397,8 +127,7 @@
             if (!qty || qty <= 0) { showToast('❌ تعداد درست لکھیں'); document.getElementById('itemQty').focus(); return; }
 
             const btn = document.getElementById('saveBtn');
-            btn.disabled = true;
-            btn.innerHTML = '⏳ محفوظ ہو رہا ہے...';
+            btn.disabled = true; btn.innerHTML = '⏳ محفوظ ہو رہا ہے...';
 
             ordersRef.push({ itemName: name, quantity: qty, timestamp: Date.now() })
                 .then(() => {
@@ -408,33 +137,18 @@
                     showToast('✅ آرڈر محفوظ ہو گیا!');
                 })
                 .catch(() => showToast('❌ Error! Check connection'))
-                .finally(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = '🛒 آرڈر محفوظ کریں';
-                });
+                .finally(() => { btn.disabled = false; btn.innerHTML = '🛒 آرڈر محفوظ کریں'; });
         }
 
-        // Enter key support
-        document.getElementById('itemQty').addEventListener('keydown', e => {
-            if (e.key === 'Enter') saveOrder();
-        });
+        document.getElementById('itemQty').addEventListener('keydown', e => { if (e.key === 'Enter') saveOrder(); });
 
-        // =========================================
-        // LOAD ORDERS (Real-time)
-        // =========================================
         ordersRef.on('value', snap => {
             const tbody = document.getElementById('orderBody');
             document.getElementById('selectAll').checked = false;
             updateDelBtn();
 
             if (!snap.exists()) {
-                tbody.innerHTML = `
-                    <tr><td colspan="4">
-                        <div class="empty-state">
-                            <div class="empty-icon">📭</div>
-                            <p style="margin:8px 0 0; font-size:13px;">ابھی کوئی آرڈر نہیں</p>
-                        </div>
-                    </td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📭</div><p>ابھی کوئی آرڈر نہیں</p></div></td></tr>`;
                 return;
             }
 
@@ -443,28 +157,17 @@
                 const v = child.val();
                 rows += `
                     <tr>
-                        <td class="checkbox-cell">
-                            <input type="checkbox" class="order-cb" value="${child.key}" onchange="updateDelBtn()">
-                        </td>
+                        <td class="checkbox-cell"><input type="checkbox" class="order-cb" value="${child.key}" onchange="updateDelBtn()"></td>
                         <td><strong>${v.itemName}</strong></td>
                         <td style="text-align:center;"><span class="qty-badge">${v.quantity}</span></td>
-                        <td style="text-align:center;">
-                            <button class="del-btn" onclick="deleteOrder('${child.key}')">🗑️</button>
-                        </td>
+                        <td style="text-align:center;"><button class="del-btn" onclick="deleteOrder('${child.key}')">🗑️</button></td>
                     </tr>`;
             });
             tbody.innerHTML = rows;
         });
 
-        // =========================================
-        // DELETE FUNCTIONS
-        // =========================================
         function deleteOrder(key) {
-            if (confirm('یہ آرڈر حذف کریں؟')) {
-                ordersRef.child(key).remove()
-                    .then(() => showToast('✅ حذف ہو گیا'))
-                    .catch(() => showToast('❌ Error'));
-            }
+            if (confirm('یہ آرڈر حذف کریں؟')) { ordersRef.child(key).remove().then(() => showToast('✅ حذف ہو گیا')); }
         }
 
         function toggleAll(cb) {
@@ -476,57 +179,36 @@
             const checked = document.querySelectorAll('.order-cb:checked');
             const btn = document.getElementById('del-selected-btn');
             if (checked.length > 0) {
-                btn.style.display = 'block';
-                btn.innerHTML = `🗑️ Delete (${checked.length})`;
-            } else {
-                btn.style.display = 'none';
-            }
+                btn.style.display = 'block'; btn.innerHTML = `🗑️ Delete (${checked.length})`;
+            } else { btn.style.display = 'none'; }
         }
 
         function deleteSelected() {
             const checked = document.querySelectorAll('.order-cb:checked');
-            if (checked.length === 0) return;
-            if (!confirm(`${checked.length} آرڈر حذف کریں؟`)) return;
+            if (checked.length === 0 || !confirm(`${checked.length} آرڈر حذف کریں؟`)) return;
 
-            const promises = [...checked].map(cb => ordersRef.child(cb.value).remove());
-            Promise.all(promises)
-                .then(() => {
-                    document.getElementById('selectAll').checked = false;
-                    showToast(`✅ ${checked.length} آرڈر حذف ہو گئے`);
-                })
+            Promise.all([...checked].map(cb => ordersRef.child(cb.value).remove()))
+                .then(() => { document.getElementById('selectAll').checked = false; showToast(`✅ ${checked.length} آرڈر حذف ہو گئے`); })
                 .catch(() => showToast('❌ کچھ غلط ہوا'));
         }
 
-        // =========================================
-        // EXPORT
-        // =========================================
         async function saveImage() {
             const el = document.getElementById('printArea');
-            // Hide action columns
             document.querySelectorAll('.checkbox-cell, .del-btn').forEach(e => e.style.visibility = 'hidden');
             const canvas = await html2canvas(el, { backgroundColor: '#ffffff', scale: 2 });
-            const link = document.createElement('a');
-            link.download = 'Order_List_' + new Date().toLocaleDateString('en-PK') + '.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
+            const link = document.createElement('a'); link.download = 'Order_List.png'; link.href = canvas.toDataURL('image/png'); link.click();
             document.querySelectorAll('.checkbox-cell, .del-btn').forEach(e => e.style.visibility = '');
-            showToast('📷 تصویر محفوظ ہو گئی!');
         }
 
         async function savePDF() {
-            const { jsPDF } = window.jspdf;
-            const el = document.getElementById('printArea');
+            const { jsPDF } = window.jspdf; const el = document.getElementById('printArea');
             document.querySelectorAll('.checkbox-cell, .del-btn').forEach(e => e.style.visibility = 'hidden');
             const canvas = await html2canvas(el, { backgroundColor: '#ffffff', scale: 2 });
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const props = pdf.getImageProperties(imgData);
-            const pdfW = pdf.internal.pageSize.getWidth() - 20;
-            const pdfH = (props.height * pdfW) / props.width;
-            pdf.addImage(imgData, 'PNG', 10, 10, pdfW, pdfH);
-            pdf.save('Order_List_' + new Date().toLocaleDateString('en-PK') + '.pdf');
+            const pdf = new jsPDF('p', 'mm', 'a4'); const imgData = canvas.toDataURL('image/png');
+            const props = pdf.getImageProperties(imgData); const pdfW = pdf.internal.pageSize.getWidth() - 20;
+            pdf.addImage(imgData, 'PNG', 10, 10, pdfW, (props.height * pdfW) / props.width);
+            pdf.save('Order_List.pdf');
             document.querySelectorAll('.checkbox-cell, .del-btn').forEach(e => e.style.visibility = '');
-            showToast('📄 PDF محفوظ ہو گئی!');
         }
     </script>
 </body>
