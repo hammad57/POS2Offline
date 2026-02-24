@@ -8,7 +8,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
     <script src="firebase-config.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -19,332 +18,204 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
             --bg: #0f172a; --card: #1e293b; --card2: #243447;
-            --accent: #22c55e; --accent2: #16a34a;
-            --text: #f1f5f9; --muted: #94a3b8;
+            --accent: #22c55e; --text: #f1f5f9; --muted: #94a3b8;
             --blue: #3b82f6; --red: #ef4444; --orange: #f59e0b;
             --border: #334155; --nav-h: 65px;
         }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg); color: var(--text);
-            margin: 0; min-height: 100vh; padding-bottom: calc(var(--nav-h) + 20px);
-        }
-
-        .header {
-            position: sticky; top: 0; z-index: 100; background: var(--card);
-            padding: 12px 15px; display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 2px solid var(--blue);
-        }
-        .header-title { font-size: 18px; font-weight: 800; color: var(--blue); }
-        .back-btn { text-decoration: none; color: var(--text); font-size: 20px; padding: 5px 10px; }
-
-        /* Dashboard Stats */
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; }
+        .header { position: sticky; top: 0; z-index: 100; background: var(--card); padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--blue); }
         .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         .stat-card { background: var(--card); border-radius: 12px; padding: 15px; border-bottom: 3px solid var(--blue); }
-        .stat-val { font-size: 18px; font-weight: 800; color: var(--text); }
-        .stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
-
-        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); overflow-x: auto; }
-        .tab { padding: 15px 20px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; }
-        .tab.active { color: var(--blue); border-bottom-color: var(--blue); background: rgba(59,130,246,0.1); }
-
+        .stat-val { font-size: 18px; font-weight: 800; }
+        .tabs { display: flex; background: var(--card); overflow-x: auto; border-bottom: 1px solid var(--border); }
+        .tab { padding: 15px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; flex: 1; text-align: center; }
+        .tab.active { color: var(--blue); border-bottom: 3px solid var(--blue); background: rgba(59,130,246,0.1); }
         .section { padding: 15px; }
         .hidden { display: none !important; }
-
-        .card { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 15px; }
-        .form-group { margin-bottom: 15px; }
-        .label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
-        .input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 15px; outline: none; }
-        .input:focus { border-color: var(--blue); }
-
-        .price-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-blue { background: var(--blue); }
-        .btn-green { background: var(--accent); }
-        .btn-orange { background: var(--orange); }
-        .btn-outline { background: transparent; border: 1.5px solid var(--border); }
-
-        /* Product Card Styling */
-        .prod-card { background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border-left: 4px solid var(--blue); }
-        .prod-info { flex: 1; }
-        .prod-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
-        .price-badge-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; font-size: 11px; }
-        .badge { padding: 2px 6px; border-radius: 4px; font-weight: 700; }
-        .badge-buy { background: #334155; color: #cbd5e1; }
-        .badge-sale { background: rgba(34,197,94,0.15); color: var(--accent); }
-        .badge-profit { background: rgba(59,130,246,0.15); color: var(--blue); }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); background: var(--card); border-top: 1px solid var(--border); display: flex; z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 600; }
-        .nav-item.active { color: var(--blue); }
-
-        #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--card2); color: white; padding: 10px 20px; border-radius: 20px; border-left: 4px solid var(--blue); opacity: 0; transition: 0.3s; z-index: 2000; pointer-events: none; }
+        .card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+        .input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; color: white; margin-top: 5px; }
+        .prod-card { background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; border-left: 4px solid var(--blue); }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 5px; }
         .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: var(--blue); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: var(--nav-h); background: var(--card); display: flex; border-top: 1px solid var(--border); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; font-size: 10px; }
+        .nav-item.active { color: var(--blue); }
     </style>
 </head>
 <body>
 
-    <div id="toast"></div>
     <div id="loader" class="loader-overlay">
-        <div class="spinner"></div>
-        <p style="margin-top:15px; font-weight:700;" id="loader-msg">Syncing Data...</p>
+        <div style="width:40px;height:40px;border:4px solid #334155;border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;"></div>
+        <p>Syncing Data...</p>
     </div>
 
     <div class="header">
-        <a href="index.html" class="back-btn">←</a>
-        <div class="header-title">⚙️ Admin Manager</div>
+        <a href="index.html" style="color:white; text-decoration:none; font-size:20px;">←</a>
+        <div style="font-weight:800; color:var(--blue);">⚙️ ADMIN PANEL</div>
+        <div></div>
     </div>
 
     <div class="dashboard">
-        <div class="stat-card">
-            <div id="stat-total" class="stat-val">0</div>
-            <div class="stat-lbl">Items Count</div>
-        </div>
-        <div class="stat-card">
-            <div id="stat-profit" class="stat-val">Rs. 0</div>
-            <div class="stat-lbl">Potential Profit</div>
-        </div>
+        <div class="stat-card"><div id="stat-total" class="stat-val">0</div><div style="font-size:10px;">ITEMS</div></div>
+        <div class="stat-card"><div id="stat-profit" class="stat-val">0</div><div style="font-size:10px;">EXP. PROFIT</div></div>
     </div>
 
     <div class="tabs">
-        <div class="tab active" id="tab-list" onclick="switchTab('list')">📦 Stock List</div>
-        <div class="tab" id="tab-add" onclick="switchTab('add')">➕ New Item</div>
-        <div class="tab" id="tab-tools" onclick="switchTab('tools')">🛠️ Sync Tools</div>
+        <div class="tab active" onclick="switchTab('list', this)">📦 LIST</div>
+        <div class="tab" onclick="switchTab('add', this)">➕ ADD</div>
+        <div class="tab" onclick="switchTab('tools', this)">🛠️ TOOLS</div>
     </div>
 
     <div id="sec-list" class="section">
-        <div class="form-group">
-            <input type="text" id="adminSearch" class="input" placeholder="🔍 Search by Name or ID..." oninput="filterProducts(this.value)">
-        </div>
+        <input type="text" id="adminSearch" class="input" placeholder="🔍 Search Name or ID..." oninput="filterProducts(this.value)">
         <div id="product-container"></div>
     </div>
 
     <div id="sec-add" class="section hidden">
         <div class="card">
-            <h3 style="margin-top:0; color:var(--blue);">Manual Entry</h3>
-            <div class="form-group">
-                <label class="label">Product Barcode/ID</label>
-                <div style="display:flex; gap:8px;">
-                    <input type="text" id="p-id" class="input" placeholder="ID">
-                    <button class="btn btn-blue" style="width:60px;" onclick="startScan()">📷</button>
-                </div>
-            </div>
-            <div class="form-group"><label class="label">English Name</label><input type="text" id="p-en" class="input"></div>
-            <div class="form-group"><label class="label">Urdu Name</label><input type="text" id="p-ur" class="input" style="direction:rtl;"></div>
-            <div class="price-row">
-                <div class="form-group"><label class="label">Purchase Price (Col D)</label><input type="number" id="p-buy" class="input" placeholder="0"></div>
-                <div class="form-group"><label class="label">Sale Price (Col E)</label><input type="number" id="p-sale" class="input" placeholder="0"></div>
-            </div>
-            <button class="btn btn-green" onclick="saveNewProduct()">✅ Save Item Locally</button>
+            <input type="text" id="p-id" class="input" placeholder="Barcode / ID">
+            <input type="text" id="p-en" class="input" placeholder="English Name">
+            <input type="text" id="p-ur" class="input" placeholder="Urdu Name" style="direction:rtl;">
+            <input type="number" id="p-buy" class="input" placeholder="Purchase Price (Col D)">
+            <input type="number" id="p-sale" class="input" placeholder="Sale Price (Col E)">
+            <button class="btn" style="background:var(--accent);" onclick="saveNewProduct()">✅ SAVE LOCALLY</button>
         </div>
-        <div id="scanner-container" style="display:none; margin-top:10px;"><div id="qr-reader"></div></div>
     </div>
 
     <div id="sec-tools" class="section hidden">
-        <div class="card">
-            <h3 style="color:var(--orange);">Google Sheets Sync</h3>
-            <p style="font-size:12px; color:var(--muted);">Cloud se sara data load karein. (D=Purchase, E=Sale)</p>
-            <button class="btn btn-orange" onclick="syncData()">🔄 Sync All Products</button>
-            <div id="last-sync-display" style="font-size:11px; color:var(--muted); text-align:center; margin-top:10px;">Last Sync: Never</div>
+        <div class="card" style="text-align:center;">
+            <h3 style="color:var(--orange);">Google Sheet Sync</h3>
+            <p id="last-sync" style="font-size:11px; color:var(--muted);">Last Sync: Never</p>
+            <button class="btn" style="background:var(--orange);" onclick="syncData()">🔄 SYNC NOW</button>
         </div>
-        <div class="card">
-            <h3>Barcode Export</h3>
-            <button class="btn btn-blue" onclick="generateBarcodePDF()">📄 Download PDF Sheet</button>
-        </div>
-        <div class="card">
-            <h3 style="color:var(--red);">Data Reset</h3>
-            <button class="btn btn-outline" style="color:var(--red); border-color:var(--red);" onclick="clearCache()">Clear App Cache</button>
-        </div>
+        <button class="btn" style="background:var(--blue);" onclick="generateBarcodePDF()">📄 DOWNLOAD BARCODES</button>
+        <button class="btn" style="background:var(--red); margin-top:20px;" onclick="clearCache()">⚠️ RESET ALL DATA</button>
     </div>
-
-    <canvas id="barcodeCanvas" style="display:none;"></canvas>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><span>📷</span>Scanner</a>
         <a href="order.html" class="nav-item"><span>🛒</span>Orders</a>
-        <a href="Saler.html" class="nav-item"><span>👥</span>Salers</a>
         <a href="manager.html" class="nav-item active"><span>⚙️</span>Admin</a>
     </nav>
+
+    <canvas id="barcodeCanvas" style="display:none;"></canvas>
 
     <script>
         const SHEET_API = "https://script.google.com/macros/s/AKfycbzX73LEA1QPzu_n-oikZH46w3sK8XLx_teqF3UrpobrKMADJHifzyDOKJTC0As8ys6o/exec";
         let allProducts = [];
 
-        function showToast(m) {
-            const t = document.getElementById('toast');
-            t.textContent = m; t.style.opacity = '1';
-            setTimeout(() => t.style.opacity = '0', 2500);
-        }
-
-        function switchTab(id) {
+        function switchTab(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById('sec-' + id).classList.remove('hidden');
-            document.getElementById('tab-' + id).classList.add('active');
-            if(id === 'list') renderList(allProducts);
+            el.classList.add('active');
         }
 
-        // --- DATA INITIALIZATION ---
         function loadLocalData() {
-            const data = localStorage.getItem('mart_data');
-            const time = localStorage.getItem('mart_data_time');
-            allProducts = data ? JSON.parse(data) : [];
-            
-            if(time) {
-                document.getElementById('last-sync-display').textContent = "Last Sync: " + new Date(parseInt(time)).toLocaleString();
-            }
-            
-            updateStats();
-            renderList(allProducts);
+            try {
+                const data = localStorage.getItem('mart_data');
+                const time = localStorage.getItem('mart_data_time');
+                allProducts = data ? JSON.parse(data) : [];
+                if(time) document.getElementById('last-sync').textContent = "Last Sync: " + new Date(parseInt(time)).toLocaleString();
+                updateUI();
+            } catch(e) { console.error("Load Error", e); }
         }
 
-        function updateStats() {
+        function updateUI() {
             document.getElementById('stat-total').textContent = allProducts.length;
-            let totalProfit = 0;
-            allProducts.forEach(p => {
-                const b = parseFloat(p.buyPrice) || 0;
-                const s = parseFloat(p.price) || 0;
-                totalProfit += (s - b);
-            });
-            document.getElementById('stat-profit').textContent = "Rs. " + totalProfit.toLocaleString();
+            let profit = 0;
+            allProducts.forEach(p => profit += (parseFloat(p.price || 0) - parseFloat(p.buyPrice || 0)));
+            document.getElementById('stat-profit').textContent = "Rs " + profit.toLocaleString();
+            renderList(allProducts);
         }
 
         function renderList(list) {
             const container = document.getElementById('product-container');
-            if (list.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--muted);">No products found.</div>`;
+            if(!list || list.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color:gray;'>No data found. Please Sync.</p>";
                 return;
             }
-            container.innerHTML = list.map(p => {
-                const b = parseFloat(p.buyPrice) || 0;
-                const s = parseFloat(p.price) || 0;
-                const pr = s - b;
-                return `
+            container.innerHTML = list.map(p => `
                 <div class="prod-card">
-                    <div class="prod-info">
-                        <div class="prod-name">${p.en || 'No Name'}</div>
-                        <div style="font-size:11px; color:var(--muted);">ID: ${p.id} | ${p.ur || ''}</div>
-                        <div class="price-badge-row">
-                            <span class="badge badge-buy">Buy: ${b}</span>
-                            <span class="badge badge-sale">Sale: ${s}</span>
-                            <span class="badge badge-profit">Profit: ${pr}</span>
+                    <div style="flex:1">
+                        <div style="font-weight:800; font-size:14px;">${p.en || 'No Name'}</div>
+                        <div style="font-size:11px; color:var(--muted);">ID: ${p.id}</div>
+                        <div style="margin-top:5px;">
+                            <span class="badge" style="background:#334155">B: ${p.buyPrice}</span>
+                            <span class="badge" style="background:rgba(34,197,94,0.2); color:var(--accent)">S: ${p.price}</span>
                         </div>
                     </div>
-                    <button style="background:var(--red); border:none; color:white; padding:10px; border-radius:8px;" onclick="deleteProduct('${p.id}')">🗑️</button>
+                    <button onclick="deleteProduct('${p.id}')" style="background:none; border:none; color:var(--red); font-size:18px;">🗑️</button>
                 </div>
-            `}).join('');
+            `).join('');
         }
 
-        function filterProducts(q) {
-            const query = q.toLowerCase().trim();
-            const filtered = allProducts.filter(p => 
-                (p.en && p.en.toLowerCase().includes(query)) || (p.id && String(p.id).includes(query))
-            );
+        function filterProducts(val) {
+            const q = val.toLowerCase();
+            const filtered = allProducts.filter(p => p.en.toLowerCase().includes(q) || String(p.id).includes(q));
             renderList(filtered);
         }
 
-        // --- THE FIXED SYNC LOGIC (Strict Column Mapping) ---
         async function syncData() {
-            document.getElementById('loader').style.display = 'flex';
+            const loader = document.getElementById('loader');
+            loader.style.display = 'flex';
             try {
-                // cache: "no-store" to get fresh data from Google Sheet
-                const res = await fetch(SHEET_API + "?action=read", { cache: "no-store" });
-                const data = await res.json();
+                const response = await fetch(SHEET_API + "?action=read");
+                const rawData = await response.json();
                 
-                // MAPPING AS PER YOUR SHEET:
-                // A (0) = ID, B (1) = English, C (2) = Urdu, D (3) = Purchase Price, E (4) = Sale Price
-                const mapped = data.map(row => ({
-                    id: String(row[0] || ""),
-                    en: String(row[1] || ""),
-                    ur: String(row[2] || ""),
-                    buyPrice: parseFloat(row[3]) || 0, // Column D (Index 3)
-                    price: parseFloat(row[4]) || 0,    // Column E (Index 4) - Named 'price' for scanner compatibility
-                    img: ""
-                })).filter(p => p.id !== ""); // Remove empty rows
+                // MAPPING logic - checking if data exists
+                if(rawData && Array.isArray(rawData)) {
+                    allProducts = rawData.map(row => ({
+                        id: String(row[0] || ""),
+                        en: String(row[1] || ""),
+                        ur: String(row[2] || ""),
+                        buyPrice: parseFloat(row[3]) || 0, // Column D
+                        price: parseFloat(row[4]) || 0      // Column E
+                    })).filter(p => p.id !== "");
 
-                localStorage.setItem('mart_data', JSON.stringify(mapped));
-                localStorage.setItem('mart_data_time', Date.now().toString());
-                
-                allProducts = mapped;
-                loadLocalData();
-                showToast("✅ Cloud Sync Complete!");
-                switchTab('list');
-            } catch (e) {
-                console.error(e);
-                showToast("❌ Connection Error! Check API Link.");
+                    localStorage.setItem('mart_data', JSON.stringify(allProducts));
+                    localStorage.setItem('mart_data_time', Date.now().toString());
+                    
+                    alert("✅ Sync Successful! " + allProducts.length + " items loaded.");
+                    loadLocalData();
+                    switchTab('list', document.querySelectorAll('.tab')[0]);
+                }
+            } catch (error) {
+                alert("❌ Sync Failed! Check internet or API link.");
+                console.error(error);
             } finally {
-                document.getElementById('loader').style.display = 'none';
+                loader.style.display = 'none';
             }
         }
 
         function saveNewProduct() {
-            const id = document.getElementById('p-id').value.trim();
-            const en = document.getElementById('p-en').value.trim();
-            const ur = document.getElementById('p-ur').value.trim();
-            const buy = document.getElementById('p-buy').value.trim();
-            const sale = document.getElementById('p-sale').value.trim();
+            const id = document.getElementById('p-id').value;
+            const en = document.getElementById('p-en').value;
+            const sale = document.getElementById('p-sale').value;
+            if(!id || !sale) return alert("ID and Sale Price are must!");
 
-            if(!id || !sale) return showToast("❌ ID and Sale Price are required!");
-
-            const newProd = { 
-                id, 
-                en, 
-                ur, 
-                buyPrice: parseFloat(buy) || 0, 
-                price: parseFloat(sale) || 0, 
-                img: "" 
+            const newObj = {
+                id: id, en: en, ur: document.getElementById('p-ur').value,
+                buyPrice: parseFloat(document.getElementById('p-buy').value) || 0,
+                price: parseFloat(sale) || 0
             };
-            
-            const idx = allProducts.findIndex(p => p.id == id);
-            if(idx > -1) allProducts[idx] = newProd; 
-            else allProducts.unshift(newProd);
-
+            allProducts.unshift(newObj);
             localStorage.setItem('mart_data', JSON.stringify(allProducts));
-            loadLocalData();
-            showToast("✅ Locally Saved!");
-            switchTab('list');
+            updateUI();
+            alert("✅ Saved Locally!");
         }
 
         function deleteProduct(id) {
-            if(confirm("Permanently delete this item?")) {
+            if(confirm("Delete item?")) {
                 allProducts = allProducts.filter(p => p.id != id);
                 localStorage.setItem('mart_data', JSON.stringify(allProducts));
-                loadLocalData();
+                updateUI();
             }
         }
 
-        function startScan() {
-            document.getElementById('scanner-container').style.display = 'block';
-            const html5QrCode = new Html5Qrcode("qr-reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decoded) => {
-                document.getElementById('p-id').value = decoded;
-                html5QrCode.stop().then(() => document.getElementById('scanner-container').style.display = 'none');
-            }).catch(()=>{});
-        }
-
-        async function generateBarcodePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const canvas = document.getElementById('barcodeCanvas');
-            let x = 10, y = 15;
-            allProducts.forEach(p => {
-                doc.setFontSize(7);
-                doc.text(`${p.en} - Rs.${p.price}`, x+2, y);
-                try {
-                    JsBarcode(canvas, String(p.id), { format:'CODE128', height:30, displayValue:false });
-                    doc.addImage(canvas.toDataURL(), 'PNG', x, y+2, 50, 15);
-                } catch(e){}
-                x += 65; if (x > 180) { x = 10; y += 30; }
-                if (y > 270) { doc.addPage(); y = 15; x = 10; }
-            });
-            doc.save('Mart_Inventory_Barcodes.pdf');
-        }
-
         function clearCache() {
-            if(confirm("WARNING: All data will be wiped. Proceed?")) {
+            if(confirm("Everything will be deleted! Are you sure?")) {
                 localStorage.clear();
                 location.reload();
             }
@@ -352,5 +223,6 @@
 
         window.onload = loadLocalData;
     </script>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 </body>
 </html>
