@@ -31,7 +31,6 @@
             margin: 0; min-height: 100vh; padding-bottom: calc(var(--nav-h) + 20px);
         }
 
-        /* HEADER */
         .header {
             position: sticky; top: 0; z-index: 100; background: var(--card);
             padding: 12px 15px; display: flex; align-items: center; justify-content: space-between;
@@ -40,75 +39,45 @@
         .header-title { font-size: 18px; font-weight: 800; color: var(--blue); }
         .back-btn { text-decoration: none; color: var(--text); font-size: 20px; padding: 5px 10px; }
 
-        /* DASHBOARD CARDS */
-        .dashboard {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px;
-        }
-        .stat-card {
-            background: var(--card); border-radius: 12px; padding: 15px;
-            border-bottom: 3px solid var(--blue);
-        }
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
+        .stat-card { background: var(--card); border-radius: 12px; padding: 15px; border-bottom: 3px solid var(--blue); }
         .stat-val { font-size: 20px; font-weight: 800; color: var(--text); }
         .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
 
-        /* TABS */
         .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); overflow-x: auto; }
-        .tab {
-            padding: 15px 20px; font-size: 13px; font-weight: 700; color: var(--muted);
-            cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent;
-        }
+        .tab { padding: 15px 20px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; }
         .tab.active { color: var(--blue); border-bottom-color: var(--blue); background: rgba(59,130,246,0.1); }
 
-        /* SECTION */
         .section { padding: 15px; }
         .hidden { display: none !important; }
 
-        /* FORM */
         .card { background: var(--card); border-radius: 16px; padding: 20px; margin-bottom: 15px; }
         .form-group { margin-bottom: 15px; }
         .label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
-        .input {
-            width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border);
-            background: var(--bg); color: var(--text); font-size: 15px; outline: none;
-        }
+        .input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 15px; outline: none; }
         .input:focus { border-color: var(--blue); }
 
-        /* BUTTONS */
-        .btn {
-            width: 100%; padding: 14px; border: none; border-radius: 12px;
-            font-size: 15px; font-weight: 800; cursor: pointer; color: white;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-blue { background: var(--blue); }
         .btn-green { background: var(--accent); }
         .btn-outline { background: transparent; border: 1.5px solid var(--border); }
 
-        /* LIST */
-        .search-bar { margin-bottom: 15px; }
-        .prod-card {
-            background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px;
-            display: flex; align-items: center; gap: 12px;
-        }
+        .prod-card { background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border-left: 4px solid var(--blue); }
         .prod-img { width: 50px; height: 50px; border-radius: 8px; background: white; object-fit: contain; }
         .prod-info { flex: 1; }
-        .prod-name { font-size: 14px; font-weight: 700; }
-        .prod-price { font-size: 13px; color: var(--accent); font-weight: 800; }
-        .prod-actions { display: flex; gap: 8px; }
-        .act-btn { padding: 8px; border-radius: 8px; border: none; cursor: pointer; color: white; }
+        .prod-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+        .prod-id { font-size: 11px; color: var(--muted); }
+        .prod-price { font-size: 14px; color: var(--accent); font-weight: 800; }
+        .act-btn { padding: 10px; border-radius: 8px; border: none; cursor: pointer; color: white; }
         .act-del { background: var(--red); }
 
-        /* NAV */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h);
-            background: var(--card); border-top: 1px solid var(--border);
-            display: flex; z-index: 1000;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); background: var(--card); border-top: 1px solid var(--border); display: flex; z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 600; }
         .nav-item.active { color: var(--blue); }
 
-        /* TOAST & LOADER */
-        #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--card2); padding: 10px 20px; border-radius: 20px; border-left: 4px solid var(--blue); opacity: 0; transition: 0.3s; z-index: 2000; }
+        #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--card2); color: white; padding: 10px 20px; border-radius: 20px; border-left: 4px solid var(--blue); opacity: 0; transition: 0.3s; z-index: 2000; pointer-events: none; }
         .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -137,14 +106,14 @@
     </div>
 
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('list', this)">📦 Product List</div>
-        <div class="tab" onclick="switchTab('add', this)">➕ Add New</div>
-        <div class="tab" onclick="switchTab('tools', this)">🛠️ Admin Tools</div>
+        <div class="tab active" id="tab-list" onclick="switchTab('list')">📦 Product List</div>
+        <div class="tab" id="tab-add" onclick="switchTab('add')">➕ Add New</div>
+        <div class="tab" id="tab-tools" onclick="switchTab('tools')">🛠️ Admin Tools</div>
     </div>
 
     <div id="sec-list" class="section">
-        <div class="search-bar">
-            <input type="text" class="input" placeholder="🔍 Search products..." oninput="filterProducts(this.value)">
+        <div class="form-group">
+            <input type="text" id="adminSearch" class="input" placeholder="🔍 Search by name or ID..." oninput="filterProducts(this.value)">
         </div>
         <div id="product-container"></div>
     </div>
@@ -161,17 +130,17 @@
             </div>
             <div class="form-group">
                 <label class="label">Name (English)</label>
-                <input type="text" id="p-en" class="input">
+                <input type="text" id="p-en" class="input" placeholder="Product Name">
             </div>
             <div class="form-group">
                 <label class="label">Name (Urdu)</label>
-                <input type="text" id="p-ur" class="input" style="direction:rtl;">
+                <input type="text" id="p-ur" class="input" style="direction:rtl;" placeholder="نام (اردو)">
             </div>
             <div class="form-group">
                 <label class="label">Price (Rs.)</label>
-                <input type="number" id="p-price" class="input">
+                <input type="number" id="p-price" class="input" placeholder="0.00">
             </div>
-            <button class="btn btn-green" onclick="saveNewProduct()">✅ Save Locally</button>
+            <button class="btn btn-green" onclick="saveNewProduct()">✅ Save Product</button>
         </div>
         <div id="scanner-container" style="display:none; margin-top:10px;">
             <div id="qr-reader"></div>
@@ -202,35 +171,35 @@
 
     <script>
         let allProducts = [];
+        let html5QrCode;
 
+        // 1. TOAST NOTIFICATION
         function showToast(m) {
             const t = document.getElementById('toast');
             t.textContent = m; t.style.opacity = '1';
             setTimeout(() => t.style.opacity = '0', 2500);
         }
 
-        function showLoader(m) {
-            document.getElementById('loader-msg').textContent = m;
-            document.getElementById('loader').style.display = 'flex';
-        }
-
-        function hideLoader() { document.getElementById('loader').style.display = 'none'; }
-
-        function switchTab(id, el) {
+        // 2. TABS SWITCHING (FIXED)
+        function switchTab(id) {
+            // Hide all sections
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            // Remove active class from all tabs
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            // Show target section and activate tab
             document.getElementById('sec-' + id).classList.remove('hidden');
-            el.classList.add('active');
+            document.getElementById('tab-' + id).classList.add('active');
+            
+            if(id === 'list') renderList(allProducts);
         }
 
-        // LOAD PRODUCTS FROM CACHE
+        // 3. LOAD & RENDER
         function loadProducts() {
             const data = localStorage.getItem('mart_data');
-            if (data) {
-                allProducts = JSON.parse(data);
-                document.getElementById('stat-total').textContent = allProducts.length;
-                renderList(allProducts);
-            }
+            allProducts = data ? JSON.parse(data) : [];
+            document.getElementById('stat-total').textContent = allProducts.length;
+            renderList(allProducts);
         }
 
         function renderList(list) {
@@ -241,28 +210,71 @@
             }
             container.innerHTML = list.map(p => `
                 <div class="prod-card">
-                    <img src="${p.img || 'https://via.placeholder.com/50'}" class="prod-img" onerror="this.src='https://via.placeholder.com/50'">
+                    <img src="${p.img || 'https://via.placeholder.com/50/1e293b/94a3b8?text=N/A'}" class="prod-img" onerror="this.src='https://via.placeholder.com/50'">
                     <div class="prod-info">
                         <div class="prod-name">${p.en || 'No Name'}</div>
+                        <div class="prod-id">ID: ${p.id}</div>
                         <div class="prod-price">Rs. ${p.price}</div>
                     </div>
-                    <div class="prod-actions">
-                        <button class="act-btn act-del" onclick="deleteLocal('${p.id}')">🗑️</button>
-                    </div>
+                    <button class="act-btn act-del" onclick="deleteProduct('${p.id}')">🗑️</button>
                 </div>
             `).join('');
         }
 
+        // 4. SEARCH FUNCTION (FIXED)
         function filterProducts(q) {
-            const query = q.toLowerCase();
+            const query = q.toLowerCase().trim();
+            if (!query) { renderList(allProducts); return; }
             const filtered = allProducts.filter(p => 
-                (p.en && p.en.toLowerCase().includes(query)) || (p.id && String(p.id).includes(query))
+                (p.en && p.en.toLowerCase().includes(query)) || 
+                (p.id && String(p.id).includes(query)) ||
+                (p.ur && p.ur.includes(query))
             );
             renderList(filtered);
         }
 
-        // SCANNER LOGIC
-        let html5QrCode;
+        // 5. SAVE NEW PRODUCT
+        function saveNewProduct() {
+            const id = document.getElementById('p-id').value.trim();
+            const en = document.getElementById('p-en').value.trim();
+            const ur = document.getElementById('p-ur').value.trim();
+            const price = document.getElementById('p-price').value.trim();
+
+            if(!id || !en || !price) {
+                showToast("❌ Please fill all required fields");
+                return;
+            }
+
+            const newProd = { id, en, ur, price, img: "" };
+            
+            // Check if ID exists
+            const index = allProducts.findIndex(p => p.id == id);
+            if(index > -1) {
+                if(!confirm("Product ID already exists. Overwrite?")) return;
+                allProducts[index] = newProd;
+            } else {
+                allProducts.unshift(newProd);
+            }
+
+            localStorage.setItem('mart_data', JSON.stringify(allProducts));
+            showToast("✅ Product Saved to Cache!");
+            
+            // Clear inputs
+            ['p-id', 'p-en', 'p-ur', 'p-price'].forEach(i => document.getElementById(i).value = '');
+            loadProducts();
+            switchTab('list');
+        }
+
+        // 6. DELETE PRODUCT
+        function deleteProduct(id) {
+            if(!confirm("Are you sure you want to delete this item?")) return;
+            allProducts = allProducts.filter(p => p.id != id);
+            localStorage.setItem('mart_data', JSON.stringify(allProducts));
+            showToast("🗑️ Deleted");
+            loadProducts();
+        }
+
+        // 7. SCANNER
         function startScan() {
             document.getElementById('scanner-container').style.display = 'block';
             html5QrCode = new Html5Qrcode("qr-reader");
@@ -271,7 +283,8 @@
                     document.getElementById('p-id').value = decoded;
                     stopScan();
                     showToast("✅ Barcode Scanned");
-                }
+                },
+                (err) => {}
             );
         }
 
@@ -279,14 +292,16 @@
             if (html5QrCode) {
                 html5QrCode.stop().then(() => {
                     document.getElementById('scanner-container').style.display = 'none';
+                }).catch(() => {
+                    document.getElementById('scanner-container').style.display = 'none';
                 });
             }
         }
 
-        // PDF GENERATION (Optimized)
+        // 8. PDF GENERATION
         async function generateBarcodePDF() {
             if (allProducts.length === 0) return showToast("❌ No products to print");
-            showLoader('Generating PDF...');
+            document.getElementById('loader').style.display = 'flex';
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -295,30 +310,30 @@
 
             for (let p of allProducts) {
                 doc.setFontSize(8);
-                doc.text(`${p.en || p.id} - Rs.${p.price}`, x + 2, y);
+                doc.text(`${(p.en || p.id).substring(0, 15)} - Rs.${p.price}`, x + 2, y);
                 try {
-                    JsBarcode(canvas, String(p.id), { format:'CODE128', height:30, displayValue:false });
+                    JsBarcode(canvas, String(p.id), { format:'CODE128', height:30, displayValue:false, margin: 2 });
                     doc.addImage(canvas.toDataURL(), 'PNG', x, y+2, 50, 15);
-                } catch(e) { doc.text("Error Barcode", x+2, y+10); }
+                } catch(e) { doc.text("Barcode Error", x+2, y+10); }
 
                 x += 65;
                 if (x > 180) { x = 10; y += 30; }
                 if (y > 270) { doc.addPage(); y = 15; x = 10; }
             }
 
-            doc.save('Mart_Barcodes.pdf');
-            hideLoader();
+            doc.save('Hammad_Mart_Barcodes.pdf');
+            document.getElementById('loader').style.display = 'none';
+            showToast("📄 PDF Downloaded");
         }
 
         function clearCache() {
-            if(confirm("Are you sure? This will delete all cached products.")){
+            if(confirm("DANGER! This will delete all your local product data. Continue?")){
                 localStorage.removeItem('mart_data');
                 location.reload();
             }
         }
 
         window.onload = loadProducts;
-        @keyframes spin { to { transform: rotate(360deg); } }
     </script>
 </body>
 </html>
