@@ -20,32 +20,25 @@
             --text: #f1f5f9; --muted: #94a3b8; --blue: #3b82f6;
             --red: #ef4444; --orange: #f59e0b; --border: #334155;
         }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; }
-        
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; }
         .header { position: sticky; top: 0; z-index: 100; background: var(--card); padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--blue); }
         .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
         .stat-card { background: var(--card); border-radius: 12px; padding: 15px; border-bottom: 3px solid var(--blue); text-align: center; }
-        
         .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); }
         .tab { padding: 15px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; flex: 1; text-align: center; }
         .tab.active { color: var(--blue); border-bottom: 3px solid var(--blue); background: rgba(59,130,246,0.1); }
-        
         .section { padding: 15px; }
         .hidden { display: none !important; }
-        
         .card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
         .input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px; outline: none; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
-
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; color: white; }
         .prod-card { background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--blue); }
         .badge { padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; margin-right: 5px; background: var(--border); }
-        
         .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
         .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: var(--blue); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: var(--card); display: flex; border-top: 1px solid var(--border); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 600; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-decoration: none; font-size: 10px; }
         .nav-item.active { color: var(--blue); }
     </style>
 </head>
@@ -53,7 +46,7 @@
 
     <div id="loader" class="loader-overlay">
         <div class="spinner"></div>
-        <p style="margin-top:15px; font-weight:bold;">Syncing Sheet Data...</p>
+        <p style="margin-top:15px;">Connecting to Google Sheet...</p>
     </div>
 
     <div class="header">
@@ -80,7 +73,7 @@
     </div>
 
     <div id="sec-list" class="section">
-        <input type="text" id="adminSearch" class="input" placeholder="🔍 Search by Name or Barcode..." oninput="filterProducts()">
+        <input type="text" id="adminSearch" class="input" placeholder="🔍 Search Name or Barcode..." oninput="filterProducts()">
         <div id="product-container"></div>
     </div>
 
@@ -89,20 +82,20 @@
             <input type="text" id="p-id" class="input" placeholder="Barcode ID">
             <input type="text" id="p-en" class="input" placeholder="Product Name (English)">
             <input type="text" id="p-ur" class="input" placeholder="Product Name (Urdu)" style="direction:rtl;">
-            <input type="number" id="p-buy" class="input" placeholder="Purchase Price (Col D)">
-            <input type="number" id="p-sale" class="input" placeholder="Sale Price (Col E)">
-            <button class="btn" style="background:var(--accent);" onclick="saveProductLocally()">✅ SAVE LOCALLY</button>
+            <input type="number" id="p-buy" class="input" placeholder="Purchase Price">
+            <input type="number" id="p-sale" class="input" placeholder="Sale Price">
+            <button class="btn" style="background:var(--accent);" onclick="saveLocal()">✅ SAVE LOCALLY</button>
         </div>
     </div>
 
     <div id="sec-sync" class="section hidden">
         <div class="card" style="text-align:center;">
-            <h3 style="margin-top:0;">Cloud Sync</h3>
-            <p id="sync-status" style="font-size:12px; color:var(--muted);">Last Sync: Never</p>
-            <button class="btn" style="background:var(--orange);" onclick="fetchFromSheet()">🔄 FETCH FROM GOOGLE SHEET</button>
+            <h3>Google Sheet Sync</h3>
+            <p id="sync-status" style="font-size:11px; color:var(--muted);">Last Sync: Never</p>
+            <button class="btn" style="background:var(--orange);" onclick="fetchFromSheet()">🔄 SYNC NOW (CLOUD)</button>
         </div>
         <button class="btn" style="background:var(--blue); margin-bottom:10px;" onclick="generatePDF()">📄 DOWNLOAD BARCODES PDF</button>
-        <button class="btn" style="background:transparent; border:1.5px solid var(--red); color:var(--red); margin-top:20px;" onclick="clearAllData()">⚠️ RESET ALL DATA</button>
+        <button class="btn" style="background:transparent; border:1px solid var(--red); color:var(--red); margin-top:20px;" onclick="resetApp()">⚠️ RESET ALL DATA</button>
     </div>
 
     <nav class="bottom-nav">
@@ -114,7 +107,6 @@
     <canvas id="barcodeCanvas" style="display:none;"></canvas>
 
     <script>
-        // Aapki Google Sheet API Link
         const SHEET_API = "https://script.google.com/macros/s/AKfycbzX73LEA1QPzu_n-oikZH46w3sK8XLx_teqF3UrpobrKMADJHifzyDOKJTC0As8ys6o/exec";
         let allProducts = [];
 
@@ -125,11 +117,13 @@
             document.getElementById('tab-' + id).classList.add('active');
         }
 
-        function loadLocal() {
-            const data = localStorage.getItem('mart_data');
+        function init() {
+            const saved = localStorage.getItem('mart_data');
             const time = localStorage.getItem('mart_data_time');
-            allProducts = data ? JSON.parse(data) : [];
-            if(time) document.getElementById('sync-status').textContent = "Last Sync: " + new Date(parseInt(time)).toLocaleString();
+            if(saved) {
+                allProducts = JSON.parse(saved);
+                if(time) document.getElementById('sync-status').textContent = "Last Sync: " + new Date(parseInt(time)).toLocaleString();
+            }
             updateUI();
         }
 
@@ -144,20 +138,20 @@
         function renderList(list) {
             const container = document.getElementById('product-container');
             if(!list || list.length === 0) {
-                container.innerHTML = "<p style='text-align:center; color:gray; margin-top:50px;'>No data found. Sync from sheet.</p>";
+                container.innerHTML = "<p style='text-align:center; margin-top:50px; color:gray;'>No data. Please Sync with Cloud.</p>";
                 return;
             }
             container.innerHTML = list.map(p => `
                 <div class="prod-card">
                     <div style="flex:1">
-                        <div style="font-weight:800; font-size:14px;">${p.en || 'No Name'}</div>
-                        <div style="font-size:11px; color:var(--muted);">ID: ${p.id}</div>
+                        <div style="font-weight:800; font-size:14px;">${p.en || p.id}</div>
+                        <div style="font-size:11px; color:var(--muted);">${p.ur || ''} (ID: ${p.id})</div>
                         <div style="margin-top:5px;">
-                            <span class="badge" style="color:var(--muted)">B: ${p.buyPrice}</span>
-                            <span class="badge" style="color:var(--accent); background:rgba(34,197,94,0.1)">S: ${p.price}</span>
+                            <span class="badge">Buy: ${p.buyPrice}</span>
+                            <span class="badge" style="color:var(--accent)">Sale: ${p.price}</span>
                         </div>
                     </div>
-                    <button onclick="deleteProduct('${p.id}')" style="background:none; border:none; color:var(--red); font-size:20px;">🗑️</button>
+                    <button onclick="deleteProd('${p.id}')" style="background:none; border:none; color:var(--red); font-size:20px;">🗑️</button>
                 </div>
             `).join('');
         }
@@ -165,16 +159,16 @@
         function filterProducts() {
             const q = document.getElementById('adminSearch').value.toLowerCase().trim();
             const filtered = allProducts.filter(p => 
-                (p.en && p.en.toLowerCase().includes(q)) || 
-                String(p.id).includes(q)
+                (p.en && p.en.toLowerCase().includes(q)) || String(p.id).includes(q)
             );
             renderList(filtered);
         }
 
-        // GOOGLE SHEET SYNC (Using XMLHttpRequest like your working file)
+        // IMPROVED SYNC LOGIC
         function fetchFromSheet() {
             document.getElementById('loader').style.display = 'flex';
             const xhr = new XMLHttpRequest();
+            // Cache bust: &t=...
             xhr.open("GET", SHEET_API + "?action=read&t=" + Date.now(), true);
             
             xhr.onreadystatechange = function() {
@@ -182,41 +176,45 @@
                     document.getElementById('loader').style.display = 'none';
                     if (xhr.status === 200) {
                         try {
-                            const raw = JSON.parse(xhr.responseText);
-                            // Mapping: A=ID, B=EN, C=UR, D=Buy, E=Sale
-                            allProducts = raw.map(row => ({
-                                id: String(row[0] || ""),
-                                en: String(row[1] || ""),
-                                ur: String(row[2] || ""),
-                                buyPrice: parseFloat(row[3]) || 0,
-                                price: parseFloat(row[4]) || 0
-                            })).filter(p => p.id !== "" && p.id.toLowerCase() !== "id");
-
-                            localStorage.setItem('mart_data', JSON.stringify(allProducts));
-                            localStorage.setItem('mart_data_time', Date.now().toString());
+                            const data = JSON.parse(xhr.responseText);
                             
-                            alert("✅ " + allProducts.length + " items synced successfully!");
-                            loadLocal();
-                            switchTab('list');
+                            // Check if data is valid before overwriting
+                            if(data && Array.isArray(data) && data.length > 0) {
+                                allProducts = data.map(row => ({
+                                    id: String(row[0] || ""),
+                                    en: String(row[1] || ""),
+                                    ur: String(row[2] || ""),
+                                    buyPrice: parseFloat(row[3]) || 0,
+                                    price: parseFloat(row[4]) || 0
+                                })).filter(p => p.id !== "" && p.id.toLowerCase() !== "id");
+
+                                localStorage.setItem('mart_data', JSON.stringify(allProducts));
+                                localStorage.setItem('mart_data_time', Date.now().toString());
+                                
+                                init();
+                                alert("✅ Success! " + allProducts.length + " items loaded.");
+                                switchTab('list');
+                            } else {
+                                alert("⚠️ Sheet is empty or format is wrong!");
+                            }
                         } catch(e) {
-                            alert("❌ Error: Could not parse sheet data.");
+                            alert("❌ JSON Error: Check if Google Script is publishing data correctly.");
                         }
                     } else {
-                        alert("❌ Server Error: " + xhr.status);
+                        alert("❌ Server Error: " + xhr.status + ". Check if your API URL is correct.");
                     }
                 }
             };
             xhr.onerror = function() {
                 document.getElementById('loader').style.display = 'none';
-                alert("❌ Connection failed!");
+                alert("❌ Network Error: Check your internet connection.");
             };
             xhr.send();
         }
 
-        function saveProductLocally() {
+        function saveLocal() {
             const id = document.getElementById('p-id').value.trim();
             if(!id) return alert("Barcode is required!");
-            
             const newProd = {
                 id: id,
                 en: document.getElementById('p-en').value,
@@ -224,19 +222,15 @@
                 buyPrice: parseFloat(document.getElementById('p-buy').value) || 0,
                 price: parseFloat(document.getElementById('p-sale').value) || 0
             };
-
-            const idx = allProducts.findIndex(p => p.id === id);
-            if(idx > -1) allProducts[idx] = newProd;
-            else allProducts.unshift(newProd);
-
+            allProducts.unshift(newProd);
             localStorage.setItem('mart_data', JSON.stringify(allProducts));
             updateUI();
-            alert("✅ Product saved locally!");
+            alert("✅ Saved!");
             switchTab('list');
         }
 
-        function deleteProduct(id) {
-            if(confirm("Delete this product?")) {
+        function deleteProd(id) {
+            if(confirm("Delete?")) {
                 allProducts = allProducts.filter(p => p.id != id);
                 localStorage.setItem('mart_data', JSON.stringify(allProducts));
                 updateUI();
@@ -244,35 +238,31 @@
         }
 
         function generatePDF() {
-            if(allProducts.length === 0) return alert("No data to export!");
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const canvas = document.getElementById('barcodeCanvas');
             let x = 10, y = 15;
-
-            allProducts.forEach((p, i) => {
+            allProducts.forEach(p => {
                 doc.setFontSize(7);
                 doc.text(`${p.en || p.id} - Rs.${p.price}`, x+2, y);
                 try {
                     JsBarcode(canvas, String(p.id), { format:'CODE128', height:30, displayValue:false });
                     doc.addImage(canvas.toDataURL(), 'PNG', x, y+2, 50, 15);
                 } catch(e){}
-                x += 65;
-                if (x > 180) { x = 10; y += 30; }
+                x += 65; if (x > 180) { x = 10; y += 30; }
                 if (y > 270) { doc.addPage(); y = 15; x = 10; }
             });
-            doc.save('Inventory_Barcodes.pdf');
+            doc.save('Barcodes.pdf');
         }
 
-        function clearAllData() {
-            if(confirm("Wipe all local data? This cannot be undone.")) {
-                localStorage.removeItem('mart_data');
-                localStorage.removeItem('mart_data_time');
+        function resetApp() {
+            if(confirm("Delete all data?")) {
+                localStorage.clear();
                 location.reload();
             }
         }
 
-        window.onload = loadLocal;
+        window.onload = init;
     </script>
 </body>
 </html>
