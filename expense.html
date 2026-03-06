@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1200, initial-scale=0.3, shrink-to-fit=no"> 
+    <title>Professional Financial Tracker</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        body { background-color: #f4f7f6; padding: 20px; font-family: 'Segoe UI', sans-serif; min-width: 1200px; margin: 0 auto; overflow-x: hidden; }
+        .main-wrapper { width: 1200px; margin: 0 auto; }
+        .summary-card { border-radius: 12px; color: white; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-height: 100px; }
+        .bg-income { background: linear-gradient(45deg, #28a745, #85d36e); }
+        .bg-expense { background: linear-gradient(45deg, #dc3545, #ff6b6b); }
+        .bg-profit { background: linear-gradient(45deg, #007bff, #66b2ff); }
+        .bg-balance { background: linear-gradient(45deg, #17a2b8, #71cedd); }
+        .bg-total-inc { background: linear-gradient(45deg, #20c997, #26af94); }
+        .bg-total-exp { background: linear-gradient(45deg, #fd7e14, #f8a059); }
+        
+        .fab-add {
+            position: fixed; right: 40px; bottom: 40px; width: 80px; height: 80px;
+            border-radius: 50%; background: #0d6efd; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            cursor: pointer; z-index: 1000;
+        }
+
+        .chart-container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .chart-wrapper { position: relative; height: 380px; width: 100%; margin-bottom: 20px; }
+        .detail-box { background: #fff3cd; border-left: 5px solid #ffca2c; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 1.1rem; }
+        #pdfReport { display: none; }
+        
+        /* Form Styling */
+        .readonly-field { background-color: #e9ecef !important; font-weight: bold; color: #495057; }
+        .income-logic-area { background: #f0fff4; border-radius: 10px; padding: 15px; border: 1px dashed #28a745; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="fab-add" onclick="openAddModal()"><i class="bi bi-plus-lg"></i></div>
+
+<div class="main-wrapper">
+    <h2 class="text-center mb-4 fw-bold text-dark">💼 Professional Financial Tracker</h2>
+
+    <div class="row text-center mb-4 g-3">
+        <div class="col-2"><div class="summary-card bg-total-inc"><h6>Total Income</h6><h3 id="totalIncVal">0</h3></div></div>
+        <div class="col-2"><div class="summary-card bg-total-exp"><h6>Total Expense</h6><h3 id="totalExpVal">0</h3></div></div>
+        <div class="col-2"><div class="summary-card bg-income"><h6>Daily Profit</h6><h3 id="dailyVal">0</h3></div></div>
+        <div class="col-2"><div class="summary-card bg-expense"><h6>Weekly Profit</h6><h3 id="weeklyVal">0</h3></div></div>
+        <div class="col-2"><div class="summary-card bg-profit"><h6>Monthly Profit</h6><h3 id="monthlyVal">0</h3></div></div>
+        <div class="col-2"><div class="summary-card bg-balance"><h6>Yearly Profit</h6><h3 id="yearlyVal">0</h3></div></div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-pills mb-3 shadow-sm bg-white p-2 rounded">
+                <li class="nav-item"><button class="nav-link active" onclick="setMode('All')">All Tracking</button></li>
+                <li class="nav-item"><button class="nav-link" onclick="setMode('Income')">Only Income</button></li>
+                <li class="nav-item"><button class="nav-link" onclick="setMode('Expense')">Only Expense</button></li>
+            </ul>
+
+            <div class="chart-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold">Financial Analytics</h5>
+                    <div class="d-flex gap-2">
+                        <input type="date" id="filterDate" class="form-control" style="width:200px;">
+                        <button class="btn btn-primary px-4" onclick="applyManualFilter()"><i class="bi bi-search"></i> Load Data</button>
+                        <button class="btn btn-light border" onclick="clearFilter()">Reset / View All</button>
+                        <button class="btn btn-outline-danger" onclick="downloadPDF()"><i class="bi bi-file-earmark-pdf"></i> Export Summary</button>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper"><canvas id="myChart"></canvas></div>
+
+                <div id="summaryDetail" class="detail-box">
+                    <div id="summaryTotalHeader" class="mb-2 fw-bold border-bottom pb-1 text-primary" style="font-size: 1.3rem;"></div>
+                    <strong>Details:</strong><br>
+                    <span id="detailText">Loading...</span>
+                </div>
+
+                <div class="table-responsive mt-4">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr><th>Date</th><th>Type</th><th>Amount</th><th>Remarks</th><th>Action</th></tr>
+                        </thead>
+                        <tbody id="dataTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="entryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="width: 600px;">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">Add New Entry</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="trackerForm">
+                    <input type="hidden" id="editId">
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold">Type</label>
+                        <select id="type" class="form-select form-select-lg" onchange="toggleFormFields()" required>
+                            <option value="Income">Income</option>
+                            <option value="Expense">Expense</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Date</label>
+                        <input type="date" id="date" class="form-control form-control-lg" required>
+                    </div>
+
+                    <div id="incomeFields" class="income-logic-area">
+                        <div class="mb-2">
+                            <label class="text-muted small fw-bold">Opening Balance (Total Savings)</label>
+                            <input type="number" id="openingBal" class="form-control readonly-field" readonly>
+                        </div>
+                        <div class="mb-2">
+                            <label class="fw-bold">Today Balance (Current Amount)</label>
+                            <input type="number" id="todayBal" class="form-control form-control-lg" oninput="calculateDifference()" placeholder="Enter current total">
+                        </div>
+                        <div class="mb-0">
+                            <label class="text-success small fw-bold">Total Income (Today Profit)</label>
+                            <input type="number" id="calculatedInc" class="form-control readonly-field" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="amountWrapper">
+                        <label class="fw-bold" id="amountLabel">Amount</label>
+                        <input type="number" id="amount" class="form-control form-control-lg" step="0.01">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold" id="remarksLabel">Remarks / Details</label>
+                        <textarea id="remarks" class="form-control" rows="2" placeholder="e.g., New Purchasing"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-2" id="saveBtn">Save Record</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="pdfReport"></div> <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    const firebaseConfig = {
+      databaseURL: "https://own-live-steam-web-default-rtdb.firebaseio.com/",
+      projectId: "own-live-steam-web"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db, 'transactions');
+
+    let transactions = [];
+    let myChart;
+    let currentMode = 'All';
+    let activeFilterDate = null;
+    const bModal = new bootstrap.Modal(document.getElementById('entryModal'));
+
+    function getTodayDate() { return new Date().toISOString().split('T')[0]; }
+
+    // Initial Setup
+    document.getElementById('filterDate').value = getTodayDate();
+
+    // Toggle Fields based on Type
+    window.toggleFormFields = () => {
+        const type = document.getElementById('type').value;
+        const incFields = document.getElementById('incomeFields');
+        const amtWrapper = document.getElementById('amountWrapper');
+        const amtLabel = document.getElementById('amountLabel');
+        const remLabel = document.getElementById('remarksLabel');
+
+        if (type === 'Income') {
+            incFields.style.display = 'block';
+            amtWrapper.style.display = 'none'; // Hide manual amount
+            remLabel.innerText = "Remarks";
+            updateOpeningBalance();
+        } else {
+            incFields.style.display = 'none';
+            amtWrapper.style.display = 'block';
+            amtLabel.innerText = "Amount Expended";
+            remLabel.innerText = "Expense Detail";
+        }
+    };
+
+    function updateOpeningBalance() {
+        // Calculation: Total Income - Total Expenses so far
+        let total = 0;
+        transactions.forEach(t => {
+            total += (t.type === 'Income' ? t.amount : -t.amount);
+        });
+        document.getElementById('openingBal').value = total.toFixed(2);
+        calculateDifference();
+    }
+
+    window.calculateDifference = () => {
+        const open = parseFloat(document.getElementById('openingBal').value) || 0;
+        const today = parseFloat(document.getElementById('todayBal').value) || 0;
+        const diff = today - open;
+        document.getElementById('calculatedInc').value = diff.toFixed(2);
+        document.getElementById('amount').value = diff; // Set hidden amount for saving
+    };
+
+    window.openAddModal = () => {
+        document.getElementById('trackerForm').reset();
+        document.getElementById('editId').value = '';
+        document.getElementById('date').value = getTodayDate();
+        toggleFormFields();
+        bModal.show();
+    };
+
+    onValue(dbRef, (snap) => {
+        transactions = [];
+        snap.forEach(c => { transactions.push({ id: c.key, ...c.val() }); });
+        updateUI();
+    });
+
+    window.updateUI = function() {
+        const tbody = document.getElementById('dataTable');
+        tbody.innerHTML = '';
+        let filtered = transactions.filter(t => {
+            return (currentMode === 'All' || t.type === currentMode) && (!activeFilterDate || t.date === activeFilterDate);
+        });
+
+        let viewInc = 0, viewExp = 0, summaryStr = "", labels = [], incData = [], expData = [];
+        
+        filtered.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(t => {
+            if(t.type === 'Income') viewInc += t.amount; else viewExp += t.amount;
+            tbody.innerHTML += `<tr>
+                <td>${t.date}</td>
+                <td class="${t.type==='Income'?'text-success':'text-danger'}"><strong>${t.type}</strong></td>
+                <td>$${t.amount.toFixed(2)}</td>
+                <td>${t.remarks}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteEntry('${t.id}')"><i class="bi bi-trash"></i></button>
+                </td>
+            </tr>`;
+            summaryStr += `• <b>${t.date}</b>: ${t.type} $${t.amount.toFixed(2)} (${t.remarks})<br>`;
+        });
+
+        document.getElementById('summaryTotalHeader').innerText = `Income: $${viewInc.toFixed(2)} | Expense: $${viewExp.toFixed(2)}`;
+        document.getElementById('detailText').innerHTML = summaryStr || "No records.";
+        
+        calculateProfits();
+        renderChart();
+    };
+
+    function calculateProfits() {
+        let cardInc = 0, cardExp = 0, dTotal = 0;
+        const today = getTodayDate();
+        transactions.forEach(t => {
+            const val = t.type === 'Income' ? t.amount : -t.amount;
+            if(t.type === 'Income') cardInc += t.amount; else cardExp += t.amount;
+            if(t.date === today) dTotal += val;
+        });
+        document.getElementById('totalIncVal').innerText = cardInc.toFixed(2);
+        document.getElementById('totalExpVal').innerText = cardExp.toFixed(2);
+        document.getElementById('dailyVal').innerText = dTotal.toFixed(2);
+    }
+
+    document.getElementById('trackerForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = {
+            date: document.getElementById('date').value,
+            type: document.getElementById('type').value,
+            amount: parseFloat(document.getElementById('amount').value),
+            remarks: document.getElementById('remarks').value
+        };
+        push(dbRef, data);
+        bModal.hide();
+    });
+
+    window.applyManualFilter = () => { activeFilterDate = document.getElementById('filterDate').value; updateUI(); };
+    window.clearFilter = () => { activeFilterDate = null; updateUI(); };
+    window.deleteEntry = (id) => { if(confirm("Delete?")) remove(ref(db, 'transactions/'+id)); };
+    
+    // PDF Export Logic (Simplified for summary)
+    window.downloadPDF = () => {
+        const area = document.getElementById('summaryDetail');
+        html2pdf().from(area).save('Summary_Report.pdf');
+    };
+
+    function renderChart() {
+        // Basic Chart update logic
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
