@@ -2,630 +2,178 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0f172a">
-    <title>Hammad Mart POS</title>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <script src="firebase-config.js"></script>
-
-    <script src="https://unpkg.com/html5-qrcode" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>License Card Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --card2: #243447;
-            --accent: #22c55e;
-            --accent2: #16a34a;
-            --text: #f1f5f9;
-            --muted: #94a3b8;
-            --blue: #3b82f6;
-            --red: #ef4444;
-            --orange: #f59e0b;
-            --border: #334155;
-            --nav-h: 65px;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* ===== HEADER ===== */
-        .header {
-            padding: 12px 15px;
-            background: var(--card);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--accent);
-            flex-shrink: 0;
-        }
-        .mart-title { display: flex; flex-direction: column; }
-        .mart-name { font-size: 18px; font-weight: 900; color: var(--accent); letter-spacing: 1px; }
-        .mart-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
-
-        .status-dot {
-            display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted);
-        }
-        .dot {
-            width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
-            box-shadow: 0 0 6px var(--accent); animation: pulse 2s infinite;
-        }
-        .dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); animation: none; }
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-        /* ===== VIEWS ===== */
-        .view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .view.hidden { display: none !important; }
-        .scroll-view { overflow-y: auto; padding-bottom: 10px; }
-        .scroll-view::-webkit-scrollbar { display: none; }
-
-        /* ===== SCANNER VIEW ===== */
-        .search-wrap {
-            padding: 10px 12px;
-            background: var(--card);
-            border-bottom: 1px solid var(--border);
-            position: relative;
-            z-index: 50;
-        }
-        .search-input {
-            width: 100%; padding: 12px 15px; border-radius: 10px;
-            border: 1.5px solid var(--border); background: var(--bg);
-            color: var(--text); font-size: 16px; outline: none; transition: border-color 0.2s;
-        }
-        .search-input:focus { border-color: var(--accent); }
-
-        #searchDropdown {
-            display: none;
-            position: absolute;
-            top: calc(100% - 2px);
-            left: 12px; right: 12px;
-            background: var(--card2);
-            border: 1.5px solid var(--accent);
-            border-radius: 0 0 12px 12px;
-            max-height: 280px;
-            overflow-y: auto;
-            z-index: 1000; /* FIXED: Increased z-index to stay above scanner */
-            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-        }
-        .search-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 15px;
-            border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s;
-        }
-        .search-item:active { background: var(--border); }
-        .search-item img { width: 45px; height: 45px; object-fit: contain; border-radius: 8px; background: white; }
-        .search-item-info { flex: 1; }
-        .search-item-en { font-weight: 700; font-size: 14px; }
-        .search-item-ur { font-size: 12px; color: var(--muted); }
-        .search-item-price { color: var(--accent); font-weight: 800; font-size: 15px; white-space: nowrap; }
-
-        /* Scanner */
-        #reader-wrap {
-            flex: 1; background: #000; overflow: hidden; position: relative;
-        }
-        #reader { width: 100% !important; max-height: 100%; }
-        #reader video { width: 100% !important; height: auto !important; }
-
-        .scan-hint {
-            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.7); color: var(--muted); font-size: 12px;
-            padding: 6px 14px; border-radius: 20px; pointer-events: none; white-space: nowrap;
-        }
-
-        /* ===== PRODUCT RESULT CARD ===== */
-        .result-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-            z-index: 1100; align-items: flex-end;
-        }
-        .result-overlay.show { display: flex; }
-
-        .result-card {
-            width: 100%; background: var(--card); padding: 25px 20px 30px;
-            border-radius: 24px 24px 0 0; text-align: center;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.6); animation: slideUp 0.25s ease-out;
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        .result-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-        .result-img {
-            width: 120px; height: 120px; object-fit: contain; background: white;
-            border-radius: 14px; padding: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .result-en { font-size: 22px; font-weight: 800; margin: 12px 0 4px; }
-        .result-ur { font-size: 18px; color: var(--muted); margin: 0 0 10px; direction: rtl; }
-        .result-price { font-size: 40px; color: var(--accent); font-weight: 900; margin: 5px 0; }
-        .result-unit { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-
-        .result-btn {
-            width: 100%; padding: 16px; border: none; border-radius: 14px;
-            background: var(--accent); color: white; font-size: 17px; font-weight: 800;
-            cursor: pointer; transition: background 0.2s, transform 0.1s;
-        }
-        .result-btn:active { background: var(--accent2); transform: scale(0.98); }
-
-        /* ===== ORDERS VIEW ===== */
-        .order-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-        .order-title { font-size: 18px; font-weight: 800; }
-        .btn-row { display: flex; gap: 8px; }
-
-        .btn-sm {
-            padding: 8px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 700;
-            cursor: pointer; color: white; transition: opacity 0.2s, transform 0.1s;
-        }
-        .btn-sm:active { opacity: 0.8; transform: scale(0.97); }
-        .btn-blue { background: var(--blue); }
-        .btn-red-s { background: var(--red); }
-
-        .order-table-wrap { padding: 0 12px 12px; }
-        .order-table {
-            width: 100%; border-collapse: collapse; background: white; color: #1e293b;
-            border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        .order-table th { background: #e2e8f0; padding: 12px 10px; font-size: 13px; font-weight: 700; text-align: left; }
-        .order-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .order-table tr:last-child td { border-bottom: none; }
-        .order-table tr:hover td { background: #f8fafc; }
-
-        .del-order-btn {
-            background: var(--red); color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;
-        }
-
-        .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
-        .empty-state .icon { font-size: 48px; margin-bottom: 10px; }
-        .empty-state p { font-size: 14px; }
-
-        /* ===== BOTTOM NAV ===== */
-        .bottom-nav {
-            height: var(--nav-h); background: var(--card); border-top: 1px solid var(--border);
-            display: flex; align-items: stretch; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 0px);
-        }
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 4px; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 600;
-            cursor: pointer; border: none; background: transparent; transition: color 0.2s; padding: 8px 0;
-            letter-spacing: 0.3px; -webkit-tap-highlight-color: transparent;
-        }
-        .nav-item .nav-icon { font-size: 22px; transition: transform 0.2s; }
-        .nav-item.active { color: var(--accent); }
-        .nav-item.active .nav-icon { transform: scale(1.15); }
-        .nav-item:active .nav-icon { transform: scale(0.9); }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed; bottom: calc(var(--nav-h) + 15px); left: 50%; transform: translateX(-50%) translateY(20px);
-            background: #1e293b; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4); opacity: 0; transition: all 0.3s; z-index: 5000;
-            white-space: nowrap; pointer-events: none; border-left: 4px solid var(--accent);
-        }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-        /* ===== INSTALL BUTTON ===== */
-        #install-btn {
-            display: none; position: fixed; top: 70px; right: 12px; background: var(--accent); color: white;
-            border: none; padding: 10px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
-            cursor: pointer; z-index: 500; box-shadow: 0 4px 15px rgba(34,197,94,0.4); animation: bounce 2s infinite;
-        }
-        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-
-        /* ===== LOADING SPINNER ===== */
-        .loader-wrap {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 30px; gap: 10px; color: var(--muted); font-size: 13px;
-        }
-        .spinner {
-            width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--accent);
-            border-radius: 50%; animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 20px; background-color: #f4f4f9; }
+        h2 { color: #333; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.1); }
+        video { width: 100%; max-width: 400px; border: 2px solid #ccc; border-radius: 5px; margin-bottom: 10px; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 5px; font-size: 16px; width: 100%; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #aaa; cursor: not-allowed; }
+        input[type="text"] { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .hidden { display: none; }
+        .status { margin-top: 10px; font-weight: bold; color: green; }
+        #reader { width: 100%; }
     </style>
 </head>
 <body>
 
-    <button id="install-btn" onclick="installApp()">📲 Install App</button>
-
-    <div id="toast" class="toast"></div>
-
-    <div class="header">
-        <div class="mart-title">
-            <div class="mart-name">🛒 HAMMAD MART</div>
-            <div class="mart-sub">Point of Sale</div>
-        </div>
-        <div class="status-dot">
-            <div id="status-dot" class="dot"></div>
-            <span id="status-text">Online</span>
-        </div>
+<div class="container">
+    <h2>License Scanner & Saver</h2>
+    
+    <div id="camera-section">
+        <video id="video" autoplay playsinline></video>
+        <button id="btn-front" onclick="captureImage('front')">1. Capture Front Side</button>
+        <button id="btn-back" class="hidden" onclick="captureImage('back')">2. Capture Back Side</button>
     </div>
 
-    <div id="view-scanner" class="view">
-        <div class="search-wrap">
-            <input
-                type="text"
-                id="searchInput"
-                class="search-input"
-                placeholder="🔍 Item search کریں (English/Urdu)..."
-                oninput="handleSearch()"
-                autocomplete="off"
-                autocorrect="off"
-            >
-            <div id="searchDropdown"></div>
-        </div>
-        <div id="reader-wrap">
-            <div id="reader"></div>
-            <div class="scan-hint">📷 Barcode کیمرے کے سامنے رکھیں</div>
-        </div>
+    <div id="qr-section" class="hidden">
+        <h3>Step 3: Enter or Scan License No.</h3>
+        <div id="reader"></div>
+        <input type="text" id="manual-input" placeholder="Enter License Number Manually">
+        <button id="btn-save" onclick="processSave()">Save Images</button>
+        <button style="background-color: #dc3545;" onclick="resetApp()">Reset / Start Over</button>
     </div>
 
-    <div id="view-orders" class="view hidden">
-        <div class="order-header">
-            <div class="order-title">📦 آرڈر لسٹ</div>
-            <div class="btn-row" id="export-btns">
-                <button class="btn-sm btn-blue" onclick="exportImage()">📷 IMG</button>
-                <button class="btn-sm btn-red-s" onclick="exportPDF()">📄 PDF</button>
-            </div>
-        </div>
-        <div class="scroll-view order-table-wrap" id="export-area">
-            <table class="order-table" id="orders-table">
-                <thead>
-                    <tr>
-                        <th>آئٹم</th>
-                        <th style="text-align:center;">مقدار</th>
-                        <th style="text-align:center; width:60px;">Del</th>
-                    </tr>
-                </thead>
-                <tbody id="order-list">
-                    <tr><td colspan="3"><div class="loader-wrap"><div class="spinner"></div><span>لوڈ ہو رہا ہے...</span></div></td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <div id="status-msg" class="status"></div>
+</div>
 
-    <div id="result-overlay" class="result-overlay" onclick="overlayClick(event)">
-        <div class="result-card" id="result-card">
-            <div class="result-handle"></div>
-            <img id="p-img" class="result-img" src="" alt="Product" loading="lazy">
-            <div id="p-en" class="result-en"></div>
-            <div id="p-ur" class="result-ur"></div>
-            <div id="p-price" class="result-price"></div>
-            <div id="p-unit" class="result-unit"></div>
-            <button class="result-btn" onclick="closeResult()">🔄 اگلا اسکین کریں</button>
-        </div>
-    </div>
+<script>
+    let frontImageBlob = null;
+    let backImageBlob = null;
+    let directoryHandle = null; // PC folder save handle
+    let html5QrcodeScanner = null;
+    let stream = null;
 
-    <nav class="bottom-nav">
-        <button class="nav-item active" id="nav-scanner" onclick="switchView('scanner')">
-            <span class="nav-icon">📷</span>
-            Scanner
-        </button>
-        <button class="nav-item" id="nav-orders" onclick="switchView('orders')">
-            <span class="nav-icon">📦</span>
-            Orders
-        </button>
-        <a href="order.html" class="nav-item">
-            <span class="nav-icon">🛒</span>
-            New Order
-        </a>
-        <a href="Saler.html" class="nav-item">
-            <span class="nav-icon">👥</span>
-            Salers
-        </a>
-        <a href="manager.html" class="nav-item">
-            <span class="nav-icon">⚙️</span>
-            Admin
-        </a>
-    </nav>
+    const video = document.getElementById('video');
+    const canvas = document.createElement('canvas');
 
-    <script>
-        // =========================================
-        // CONFIG
-        // =========================================
-        const SHEET_API = "https://script.google.com/macros/s/AKfycbzX73LEA1QPzu_n-oikZH46w3sK8XLx_teqF3UrpobrKMADJHifzyDOKJTC0As8ys6o/exec";
+    // Start Normal Camera
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            video.srcObject = stream;
+        } catch (err) {
+            alert("Camera error: " + err.message);
+        }
+    }
+
+    startCamera();
+
+    // Capture Image (Front or Back)
+    function captureImage(side) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
         
-        // Note: Firebase is now initialized globally via firebase-config.js
-        // The `db` variable is already available from that script.
-
-        // =========================================
-        // ONLINE/OFFLINE STATUS
-        // =========================================
-        function updateStatus(online) {
-            const dot = document.getElementById('status-dot');
-            const txt = document.getElementById('status-text');
-            if (online) {
-                dot.classList.remove('offline');
-                txt.textContent = 'Online';
+        canvas.toBlob((blob) => {
+            if (side === 'front') {
+                frontImageBlob = blob;
+                document.getElementById('btn-front').classList.add('hidden');
+                document.getElementById('btn-back').classList.remove('hidden');
+                document.getElementById('status-msg').innerText = "Front side captured!";
             } else {
-                dot.classList.add('offline');
-                txt.textContent = 'Offline';
-                showToast('⚠️ Offline Mode - Cached data');
-            }
-        }
-        window.addEventListener('online', () => updateStatus(true));
-        window.addEventListener('offline', () => updateStatus(false));
-        updateStatus(navigator.onLine);
-
-        // =========================================
-        // TOAST
-        // =========================================
-        let toastTimer;
-        function showToast(msg, duration = 2500) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => t.classList.remove('show'), duration);
-        }
-
-        // =========================================
-        // PWA INSTALL
-        // =========================================
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', e => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('install-btn').style.display = 'block';
-        });
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-                document.getElementById('install-btn').style.display = 'none';
-            }
-        }
-
-        // =========================================
-        // SERVICE WORKER
-        // =========================================
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => console.log('✅ SW Registered'))
-                .catch(err => console.warn('SW Error:', err));
-        }
-
-        // =========================================
-        // SYNC DATA FROM GOOGLE SHEET
-        // =========================================
-        async function syncData() {
-            const cached = localStorage.getItem('mart_data');
-            if (!cached) {
-                // First time - show full screen loader
-                document.getElementById('view-scanner').innerHTML += '<div class="loader-wrap" style="position:absolute;inset:0;background:var(--bg);z-index:10;justify-content:center;"><div class="spinner"></div><span>Data لوڈ ہو رہا ہے...</span></div>';
-            }
-
-            try {
-                const res = await fetch(SHEET_API + "?action=read", { cache: "no-store" });
-                if (!res.ok) throw new Error('API Error');
-                const data = await res.json();
-                localStorage.setItem('mart_data', JSON.stringify(data));
-                localStorage.setItem('mart_data_time', Date.now());
-                console.log(`✅ Synced ${data.length} products`);
+                backImageBlob = blob;
+                document.getElementById('camera-section').classList.add('hidden');
+                document.getElementById('qr-section').classList.remove('hidden');
+                document.getElementById('status-msg').innerText = "Back side captured! Now scan or enter number.";
                 
-                // Remove initial loader if it exists
-                const loader = document.querySelector('#view-scanner > .loader-wrap');
-                if (loader) loader.remove();
-            } catch (err) {
-                console.warn('📴 Offline - Using cached data');
-                if (!cached) showToast('❌ Data load failed');
+                // Stop camera stream to free it for QR Scanner
+                stream.getTracks().forEach(track => track.stop());
+                startQRScanner();
             }
+        }, 'image/jpeg');
+    }
+
+    // Start QR Scanner
+    function startQRScanner() {
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        document.getElementById('manual-input').value = decodedText;
+        document.getElementById('status-msg').innerText = "QR Scanned Successfully!";
+        html5QrcodeScanner.clear(); // Stop scanning after success
+    }
+
+    function onScanFailure(error) {
+        // Ignored, continuous scanning
+    }
+
+    // Process Saving based on Desktop vs Mobile
+    async function processSave() {
+        const licenseNo = document.getElementById('manual-input').value.trim();
+        if (!licenseNo) {
+            alert("Please enter or scan a license number first.");
+            return;
         }
 
-        // =========================================
-        // SCANNER
-        // =========================================
-        let scanner;
-        function initScanner() {
-            if (scanner) return;
-            scanner = new Html5QrcodeScanner("reader", {
-                fps: 15,
-                qrbox: { width: 260, height: 140 },
-                aspectRatio: 1.5,
-                showTorchButtonIfSupported: true,
-                showZoomSliderIfSupported: true,
-                defaultZoomValueIfSupported: 1.5
-            });
-            scanner.render(
-                (decoded) => {
-                    const id = String(decoded).trim();
-                    const data = JSON.parse(localStorage.getItem('mart_data') || '[]');
-                    const product = data.find(p => String(p.id).trim() === id);
-                    if (product) {
-                        showProduct(product);
-                    } else {
-                        showToast('❌ Product Not Found: ' + id);
-                        scanner.pause(true);
-                        setTimeout(() => scanner.resume(), 2000);
-                    }
-                },
-                err => {} // Suppress scan errors
-            );
-        }
+        const frontName = `${licenseNo} F.jpg`;
+        const backName = `${licenseNo} B.jpg`;
 
-        // =========================================
-        // SEARCH
-        // =========================================
-        function handleSearch() {
-            const q = document.getElementById('searchInput').value.toLowerCase().trim();
-            const dropdown = document.getElementById('searchDropdown');
-            if (q.length < 1) { dropdown.style.display = 'none'; return; }
-
-            const data = JSON.parse(localStorage.getItem('mart_data') || '[]');
-            const matches = data.filter(p =>
-                (p.en && p.en.toLowerCase().includes(q)) ||
-                (p.ur && p.ur.includes(q))
-            ).slice(0, 8);
-
-            dropdown.innerHTML = '';
-            if (matches.length > 0) {
-                matches.forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = 'search-item';
-                    div.innerHTML = `
-                        <img src="${p.img || 'https://via.placeholder.com/45/1e293b/94a3b8?text=N/A'}" onerror="this.src='https://via.placeholder.com/45'">
-                        <div class="search-item-info">
-                            <div class="search-item-en">${p.en || ''}</div>
-                            <div class="search-item-ur">${p.ur || ''}</div>
-                        </div>
-                        <div class="search-item-price">Rs.${p.price}</div>
-                    `;
-                    div.onclick = () => {
-                        showProduct(p);
-                        dropdown.style.display = 'none';
-                        document.getElementById('searchInput').value = '';
-                    };
-                    dropdown.appendChild(div);
-                });
-                dropdown.style.display = 'block';
-            } else {
-                dropdown.innerHTML = '<div class="search-item" style="color:var(--muted);">کوئی نتیجہ نہیں</div>';
-                dropdown.style.display = 'block';
-            }
-        }
-
-        // Close dropdown on outside click
-        document.addEventListener('click', e => {
-            if (!e.target.closest('.search-wrap')) {
-                document.getElementById('searchDropdown').style.display = 'none';
-            }
-        });
-
-        // =========================================
-        // SHOW PRODUCT
-        // =========================================
-        function showProduct(p) {
-            document.getElementById('p-img').src = (p.img && p.img.length > 20)
-                ? p.img
-                : 'https://via.placeholder.com/120/1e293b/94a3b8?text=No+Image';
-            document.getElementById('p-en').textContent = p.en || 'No Name';
-            document.getElementById('p-ur').textContent = p.ur || '';
-            document.getElementById('p-price').textContent = 'Rs. ' + (p.price || '0');
-            document.getElementById('p-unit').textContent = p.unit ? `Per ${p.unit}` : '';
-            document.getElementById('result-overlay').classList.add('show');
-            try { scanner && scanner.pause(true); } catch(e) {}
-        }
-
-        function closeResult() {
-            document.getElementById('result-overlay').classList.remove('show');
-            document.getElementById('searchInput').value = '';
-            try { scanner && scanner.resume(); } catch(e) {}
-        }
-
-        function overlayClick(e) {
-            if (e.target === document.getElementById('result-overlay')) closeResult();
-        }
-
-        // =========================================
-        // VIEW SWITCHING
-        // =========================================
-        function switchView(view) {
-            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-            document.getElementById('view-' + view).classList.remove('hidden');
-            document.getElementById('nav-' + view).classList.add('active');
-
-            if (view === 'orders') loadOrders();
-        }
-
-        // =========================================
-        // ORDERS (Firebase)
-        // =========================================
-        let ordersListener = null;
-        function loadOrders() {
-            if (ordersListener) return; // Already listening
-
-            ordersListener = db.ref('orders').on('value', snap => {
-                const tbody = document.getElementById('order-list');
-                if (!snap.exists()) {
-                    tbody.innerHTML = `
-                        <tr><td colspan="3">
-                            <div class="empty-state">
-                                <div class="icon">📭</div>
-                                <p>کوئی آرڈر نہیں</p>
-                            </div>
-                        </td></tr>`;
-                    return;
+        // Check if browser supports File System Access API (Mostly PC Chrome)
+        if (window.showDirectoryPicker) {
+            try {
+                if (!directoryHandle) {
+                    // Mange ga location pehli dafa
+                    directoryHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                 }
-                let rows = '';
-                snap.forEach(child => {
-                    const v = child.val();
-                    rows += `<tr>
-                        <td><strong>${v.itemName}</strong></td>
-                        <td style="text-align:center;">
-                            <span style="background:#dcfce7;color:#166534;padding:4px 10px;border-radius:12px;font-weight:700;font-size:13px;">${v.quantity}</span>
-                        </td>
-                        <td style="text-align:center;">
-                            <button class="del-order-btn" onclick="deleteOrder('${child.key}')">🗑️</button>
-                        </td>
-                    </tr>`;
-                });
-                tbody.innerHTML = rows;
-            });
-        }
-
-        function deleteOrder(id) {
-            if (confirm('یہ آرڈر حذف کریں؟')) {
-                db.ref('orders/' + id).remove()
-                    .then(() => showToast('✅ آرڈر حذف ہو گیا'))
-                    .catch(() => showToast('❌ Error deleting'));
+                
+                await saveToFileSystem(directoryHandle, frontImageBlob, frontName);
+                await saveToFileSystem(directoryHandle, backImageBlob, backName);
+                
+                document.getElementById('status-msg').innerText = `Saved in selected folder: ${frontName} & ${backName}`;
+            } catch (error) {
+                console.log("File System API failed or user cancelled, falling back to normal download.", error);
+                downloadFallback(frontImageBlob, frontName);
+                downloadFallback(backImageBlob, backName);
             }
+        } else {
+            // Mobile ya old browsers k liye direct download (Downloads folder mein jaye ga)
+            downloadFallback(frontImageBlob, frontName);
+            downloadFallback(backImageBlob, backName);
+            document.getElementById('status-msg').innerText = `Images downloaded to mobile Downloads folder.`;
         }
 
-        // =========================================
-        // EXPORT ORDERS
-        // =========================================
-        async function exportImage() {
-            const el = document.getElementById('export-area');
-            document.querySelectorAll('.del-order-btn').forEach(b => b.style.display = 'none');
-            const canvas = await html2canvas(el, { backgroundColor: '#fff' });
-            const link = document.createElement('a');
-            link.download = 'Orders_' + new Date().toLocaleDateString('en-PK') + '.png';
-            link.href = canvas.toDataURL();
-            link.click();
-            document.querySelectorAll('.del-order-btn').forEach(b => b.style.display = '');
-            showToast('📷 Image saved!');
-        }
+        setTimeout(resetApp, 3000);
+    }
 
-        function exportPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const el = document.getElementById('export-area');
-            document.querySelectorAll('.del-order-btn').forEach(b => b.style.display = 'none');
-            html2canvas(el, { backgroundColor: '#fff' }).then(canvas => {
-                const img = canvas.toDataURL('image/png');
-                const props = doc.getImageProperties(img);
-                const w = doc.internal.pageSize.getWidth() - 20;
-                const h = (props.height * w) / props.width;
-                doc.addImage(img, 'PNG', 10, 10, w, h);
-                doc.save('Orders_' + new Date().toLocaleDateString('en-PK') + '.pdf');
-                document.querySelectorAll('.del-order-btn').forEach(b => b.style.display = '');
-                showToast('📄 PDF saved!');
-            });
-        }
+    // Save using PC File System API
+    async function saveToFileSystem(dirHandle, blob, filename) {
+        const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+    }
 
-        // =========================================
-        // INIT
-        // =========================================
-        window.addEventListener('load', () => {
-            syncData();
-            // Small delay for scanner library to load
-            setTimeout(initScanner, 800);
-        });
-    </script>
+    // Normal Download Function (Mobile Fallback)
+    function downloadFallback(blob, filename) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Reset sab kuch nayee capture k liye
+    function resetApp() {
+        if (html5QrcodeScanner) {
+            try { html5QrcodeScanner.clear(); } catch(e){}
+        }
+        document.getElementById('camera-section').classList.remove('hidden');
+        document.getElementById('qr-section').classList.add('hidden');
+        document.getElementById('btn-front').classList.remove('hidden');
+        document.getElementById('btn-back').classList.add('hidden');
+        document.getElementById('manual-input').value = "";
+        document.getElementById('status-msg').innerText = "";
+        startCamera();
+    }
+</script>
+
 </body>
 </html>
