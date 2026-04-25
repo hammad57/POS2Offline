@@ -2,93 +2,279 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>License Card Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Advanced License Scanner</title>
+    
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 20px; background-color: #f4f4f9; }
-        h2 { color: #333; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.1); }
-        video { width: 100%; max-width: 400px; border: 2px solid #ccc; border-radius: 5px; margin-bottom: 10px; }
-        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 5px; font-size: 16px; width: 100%; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin: 0; padding: 10px; background-color: #f0f2f5; color: #333; overscroll-behavior: contain; }
+        h2 { margin-top: 10px; font-size: 1.4rem; color: #007bff; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0px 5px 15px rgba(0,0,0,0.1); }
+        
+        /* Camera & Video Area */
+        #camera-container { position: relative; width: 100%; max-width: 400px; margin: 0 auto 15px auto; overflow: hidden; border-radius: 10px; border: 3px solid #ccc; line-height: 0; /* remove video bottom gap */ }
+        video { width: 100%; height: auto; background-color: black; }
+        
+        /* Flash Icon Styling */
+        #flash-toggle { position: absolute; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.6); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background 0.3s; }
+        #flash-toggle:hover { background: rgba(0, 0, 0, 0.8); }
+        #flash-toggle.on { color: #ffeb3b; background: rgba(255, 255, 255, 0.3); box-shadow: 0 0 10px #ffeb3b; }
+
+        /* Cropping Area */
+        #crop-container { width: 100%; max-width: 400px; margin: 0 auto 15px auto; display: none; /* Hidden initially */ }
+        #image-to-crop { max-width: 100%; display: block; }
+        
+        /* Buttons */
+        button { background-color: #007bff; color: white; border: none; padding: 12px 20px; margin: 5px 0; cursor: pointer; border-radius: 8px; font-size: 16px; font-weight: bold; width: 100%; transition: background-color 0.2s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
         button:hover { background-color: #0056b3; }
+        button:active { transform: scale(0.98); }
         button:disabled { background-color: #aaa; cursor: not-allowed; }
-        input[type="text"] { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        .hidden { display: none; }
-        .status { margin-top: 10px; font-weight: bold; color: green; }
-        #reader { width: 100%; }
+        button.reset-btn { background-color: #dc3545; margin-top: 15px; }
+        button.reset-btn:hover { background-color: #a71d2a; }
+        button.success-btn { background-color: #28a745; }
+        button.success-btn:hover { background-color: #1e7e34; }
+
+        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input[type="text"]:focus { border-color: #007bff; outline: none; }
+        
+        .hidden { display: none !important; }
+        .status { margin: 15px 0; font-weight: bold; color: #28a745; padding: 10px; border-radius: 8px; background-color: #e6fffa; display: none;}
+        #reader { width: 100%; border-radius: 10px; overflow: hidden; border: 2px solid #ccc;}
+
+        /* Mobile specific adjustments */
+        @media (max-width: 600px) {
+            .container { padding: 10px; border-radius: 10px; }
+            h2 { font-size: 1.2rem; }
+            button { padding: 15px; font-size: 17px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>License Scanner & Saver</h2>
+    <h2>License Card Scanner</h2>
     
+    <div id="status-msg" class="status"></div>
+
     <div id="camera-section">
-        <video id="video" autoplay playsinline></video>
-        <button id="btn-front" onclick="captureImage('front')">1. Capture Front Side</button>
-        <button id="btn-back" class="hidden" onclick="captureImage('back')">2. Capture Back Side</button>
+        <div id="camera-container">
+            <button id="flash-toggle" title="Toggle Flash" onclick="toggleFlash()">⚡</button>
+            <video id="video" autoplay playsinline></video>
+        </div>
+        <button id="btn-capture" onclick="takePhoto()">Capture Photo</button>
+        <p id="camera-instruction" style="font-weight: bold; color: #555;">Please point to FRONT side.</p>
+    </div>
+
+    <div id="crop-section" class="hidden">
+        <h3 style="margin-top:0;">Adjust & Crop</h3>
+        <div id="crop-container">
+            <img id="image-to-crop" src="" alt="Temp capture">
+        </div>
+        <button class="success-btn" onclick="finalizeCrop()">Done Cropping</button>
     </div>
 
     <div id="qr-section" class="hidden">
-        <h3>Step 3: Enter or Scan License No.</h3>
+        <h3>Step 3: Scan QR or Enter No.</h3>
         <div id="reader"></div>
-        <input type="text" id="manual-input" placeholder="Enter License Number Manually">
-        <button id="btn-save" onclick="processSave()">Save Images</button>
-        <button style="background-color: #dc3545;" onclick="resetApp()">Reset / Start Over</button>
+        <input type="text" id="manual-input" placeholder="Enter License Number (e.g., 1234567)">
+        <button class="success-btn" id="btn-save" onclick="processSave()">Save Both Images</button>
+        <button class="reset-btn" onclick="resetApp()">Reset / Start Over</button>
     </div>
 
-    <div id="status-msg" class="status"></div>
 </div>
 
 <script>
+    // State variables
+    let currentPhase = 'front'; // front, front-cropping, back, back-cropping, qr-save
     let frontImageBlob = null;
     let backImageBlob = null;
-    let directoryHandle = null; // PC folder save handle
+    let directoryHandle = null; // for PC persistent folder
     let html5QrcodeScanner = null;
     let stream = null;
+    let videoTrack = null; // for flash control
+    let cropper = null; // cropper instance
 
+    // DOM Elements
     const video = document.getElementById('video');
-    const canvas = document.createElement('canvas');
+    const flashBtn = document.getElementById('flash-toggle');
+    const cameraSection = document.getElementById('camera-section');
+    const instructionText = document.getElementById('camera-instruction');
+    const btnCapture = document.getElementById('btn-capture');
+    
+    const cropSection = document.getElementById('crop-section');
+    const cropContainer = document.getElementById('crop-container');
+    const imageToCrop = document.getElementById('image-to-crop');
 
-    // Start Normal Camera
-    async function startCamera() {
+    const qrSection = document.getElementById('qr-section');
+    const statusMsg = document.getElementById('status-msg');
+
+    // Utility to show status
+    function showStatus(text, isError = false) {
+        statusMsg.innerText = text;
+        statusMsg.style.display = 'block';
+        statusMsg.style.color = isError ? '#dc3545' : '#28a745';
+        statusMsg.style.backgroundColor = isError ? '#fff5f5' : '#e6fffa';
+        if(!isError) setTimeout(() => statusMsg.style.display = 'none', 4000);
+    }
+
+    // --- FLASH / TORCH CONTROL ---
+    async function toggleFlash() {
+        if (!videoTrack) return;
+        
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            video.srcObject = stream;
+            const capabilities = videoTrack.getCapabilities();
+            // Check if device supports torch
+            if (!capabilities.torch) {
+                showStatus("Flash not supported on this camera.", true);
+                flashBtn.style.display = 'none'; // hide if not supported
+                return;
+            }
+
+            const currentTorchState = videoTrack.getSettings().torch || false;
+            const newTorchState = !currentTorchState;
+
+            await videoTrack.applyConstraints({
+                advanced: [{ torch: newTorchState }]
+            });
+
+            // Update UI
+            if (newTorchState) {
+                flashBtn.classList.add('on');
+            } else {
+                flashBtn.classList.remove('on');
+            }
+
         } catch (err) {
-            alert("Camera error: " + err.message);
+            console.error("Flash error:", err);
+            showStatus("Could not control flash.", true);
         }
     }
 
-    startCamera();
+    // --- CAMERA INITIALIZATION ---
+    async function startCamera() {
+        showStatus("Opening camera...");
+        try {
+            // Stop existing tracks if any
+            if(stream) stream.getTracks().forEach(track => track.stop());
 
-    // Capture Image (Front or Back)
-    function captureImage(side) {
+            // Prefer back camera, require good resolution
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                } 
+            });
+            video.srcObject = stream;
+            videoTrack = stream.getVideoTracks()[0];
+
+            // Check flash capability after camera starts
+            setTimeout(() => {
+                const capabilities = videoTrack.getCapabilities();
+                if(!capabilities.torch) {
+                    flashBtn.style.display = 'none'; // Hide if not available
+                } else {
+                    flashBtn.style.display = 'flex';
+                }
+            }, 500);
+
+        } catch (err) {
+            console.error(err);
+            showStatus("Camera Access Denied or Not Available.", true);
+            alert("Please allow camera permissions.");
+        }
+    }
+
+    // --- CAPTURE & CROP FLOW ---
+
+    // 1. Take initial full photo
+    function takePhoto() {
+        const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
         
-        canvas.toBlob((blob) => {
-            if (side === 'front') {
-                frontImageBlob = blob;
-                document.getElementById('btn-front').classList.add('hidden');
-                document.getElementById('btn-back').classList.remove('hidden');
-                document.getElementById('status-msg').innerText = "Front side captured!";
-            } else {
-                backImageBlob = blob;
-                document.getElementById('camera-section').classList.add('hidden');
-                document.getElementById('qr-section').classList.remove('hidden');
-                document.getElementById('status-msg').innerText = "Back side captured! Now scan or enter number.";
-                
-                // Stop camera stream to free it for QR Scanner
-                stream.getTracks().forEach(track => track.stop());
-                startQRScanner();
-            }
-        }, 'image/jpeg');
+        // Convert canvas to base64 for the cropper tool
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        
+        // Turn off camera temporarily
+        if(stream) stream.getTracks().forEach(track => track.stop());
+        flashBtn.classList.remove('on'); // visual reset
+
+        // Move to cropping phase
+        openCropper(dataUrl);
     }
 
-    // Start QR Scanner
+    // 2. Open Cropper UI
+    function openCropper(imageDataUrl) {
+        cameraSection.classList.add('hidden');
+        cropSection.classList.remove('hidden');
+        cropContainer.style.display = 'block';
+        
+        imageToCrop.src = imageDataUrl;
+
+        // Initialize Cropper.js
+        if (cropper) cropper.destroy(); // clear previous instance
+        
+        cropper = new Cropper(imageToCrop, {
+            viewMode: 1, // Restrict crop box within the canvas
+            dragMode: 'move', // Default action when clicking outside crop box
+            autoCropArea: 0.8, // Define the automatic crop area size
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false,
+        });
+    }
+
+    // 3. Finalize Crop, store blob, decide next step
+    function finalizeCrop() {
+        if (!cropper) return;
+
+        // Get high quality cropped canvas
+        const croppedCanvas = cropper.getCroppedCanvas({
+            maxWidth: 2048, // Limit max size for performance/storage
+            maxHeight: 2048,
+            imageSmoothingHigh: true,
+        });
+
+        croppedCanvas.toBlob((blob) => {
+            cropper.destroy();
+            cropper = null;
+            cropSection.classList.add('hidden');
+
+            if (currentPhase === 'front') {
+                frontImageBlob = blob;
+                showStatus("FRONT side cropped successfully.");
+                
+                // Set up for BACK side
+                currentPhase = 'back';
+                instructionText.innerText = "Please point to BACK side.";
+                btnCapture.innerText = "Capture BACK Side";
+                cameraSection.classList.remove('hidden');
+                startCamera(); // restart camera for back
+            } 
+            else if (currentPhase === 'back') {
+                backImageBlob = blob;
+                showStatus("BACK side cropped successfully.");
+                
+                // Move to QR & Save phase
+                currentPhase = 'qr-save';
+                cameraSection.classList.add('hidden');
+                qrSection.classList.remove('hidden');
+                startQRScanner();
+            }
+        }, 'image/jpeg', 0.9);
+    }
+
+    // --- STEP 3: QR SCANNER & PERSISTENT SAVING ---
+
     function startQRScanner() {
         html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
         html5QrcodeScanner.render(onScanSuccess, onScanFailure);
@@ -96,53 +282,43 @@
 
     function onScanSuccess(decodedText, decodedResult) {
         document.getElementById('manual-input').value = decodedText;
-        document.getElementById('status-msg').innerText = "QR Scanned Successfully!";
+        showStatus("QR Code Scanned!");
         html5QrcodeScanner.clear(); // Stop scanning after success
     }
 
-    function onScanFailure(error) {
-        // Ignored, continuous scanning
-    }
+    function onScanFailure(error) { /* Ignored */ }
 
-    // Process Saving based on Desktop vs Mobile
-    async function processSave() {
-        const licenseNo = document.getElementById('manual-input').value.trim();
-        if (!licenseNo) {
-            alert("Please enter or scan a license number first.");
-            return;
-        }
+    // PC Persistent Folder Saving Logic
+    async function getPersistentFolder() {
+        if (!window.showDirectoryPicker) return null; // Not PC/Supported
 
-        const frontName = `${licenseNo} F.jpg`;
-        const backName = `${licenseNo} B.jpg`;
-
-        // Check if browser supports File System Access API (Mostly PC Chrome)
-        if (window.showDirectoryPicker) {
-            try {
-                if (!directoryHandle) {
-                    // Mange ga location pehli dafa
-                    directoryHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-                }
-                
-                await saveToFileSystem(directoryHandle, frontImageBlob, frontName);
-                await saveToFileSystem(directoryHandle, backImageBlob, backName);
-                
-                document.getElementById('status-msg').innerText = `Saved in selected folder: ${frontName} & ${backName}`;
-            } catch (error) {
-                console.log("File System API failed or user cancelled, falling back to normal download.", error);
-                downloadFallback(frontImageBlob, frontName);
-                downloadFallback(backImageBlob, backName);
+        // Try using existing handle if available
+        if (directoryHandle) {
+            // Verify permission
+            const opt = { mode: 'readwrite' };
+            if ((await directoryHandle.queryPermission(opt)) === 'granted') {
+                return directoryHandle;
             }
-        } else {
-            // Mobile ya old browsers k liye direct download (Downloads folder mein jaye ga)
-            downloadFallback(frontImageBlob, frontName);
-            downloadFallback(backImageBlob, backName);
-            document.getElementById('status-msg').innerText = `Images downloaded to mobile Downloads folder.`;
+            if ((await directoryHandle.requestPermission(opt)) === 'granted') {
+                return directoryHandle;
+            }
+            // If denied, reset and ask again below
+            directoryHandle = null; 
         }
 
-        setTimeout(resetApp, 3000);
+        try {
+            // Ask user to pick a folder (first time)
+            showStatus("Please select a folder to save licenses...");
+            directoryHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+            showStatus("Folder selected. Saving will be automatic now.");
+            return directoryHandle;
+        } catch (err) {
+            console.error("Folder picker cancelled or error:", err);
+            showStatus("Folder selection cancelled. Using standard download.", true);
+            return null;
+        }
     }
 
-    // Save using PC File System API
     async function saveToFileSystem(dirHandle, blob, filename) {
         const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
         const writable = await fileHandle.createWritable();
@@ -150,7 +326,7 @@
         await writable.close();
     }
 
-    // Normal Download Function (Mobile Fallback)
+    // Mobile Fallback: Direct Download
     function downloadFallback(blob, filename) {
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
@@ -158,21 +334,93 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        // Important: clean up memory after a delay
+        setTimeout(() => URL.revokeObjectURL(link.href), 100); 
     }
 
-    // Reset sab kuch nayee capture k liye
+    async function processSave() {
+        const licenseNo = document.getElementById('manual-input').value.trim();
+        // Basic validation: must exist, no special characters that break filenames
+        if (!licenseNo || /[<>:"\/\\|?*]/.test(licenseNo)) {
+            alert("Please enter a valid License Number (no special characters).");
+            return;
+        }
+
+        document.getElementById('btn-save').disabled = true;
+        document.getElementById('btn-save').innerText = "Saving...";
+
+        const frontName = `${licenseNo} F.jpg`;
+        const backName = `${licenseNo} B.jpg`;
+
+        // Check PC vs Mobile saving
+        const pcFolderHandle = await getPersistentFolder();
+
+        if (pcFolderHandle) {
+            try {
+                await saveToFileSystem(pcFolderHandle, frontImageBlob, frontName);
+                await saveToFileSystem(pcFolderHandle, backImageBlob, backName);
+                showStatus(`Saved successfully to folder: ${licenseNo}`);
+            } catch (err) {
+                console.error("Save error:", err);
+                showStatus("Error saving to folder. Trying direct download.", true);
+                downloadFallback(frontImageBlob, frontName);
+                downloadFallback(backImageBlob, backName);
+            }
+        } else {
+            // Mobile ya logic fail hone par manual downloads
+            downloadFallback(frontImageBlob, frontName);
+            downloadFallback(backImageBlob, backName);
+            showStatus(`Images downloaded to Downloads folder.`);
+        }
+
+        // Auto restart after saving
+        setTimeout(resetApp, 3000);
+    }
+
+    // Reset everything for a new card
     function resetApp() {
+        // Cleanup flash UI
+        flashBtn.classList.remove('on');
+        flashBtn.style.display = 'none';
+
+        // Cleanup QR Scanner
         if (html5QrcodeScanner) {
             try { html5QrcodeScanner.clear(); } catch(e){}
         }
-        document.getElementById('camera-section').classList.remove('hidden');
-        document.getElementById('qr-section').classList.add('hidden');
-        document.getElementById('btn-front').classList.remove('hidden');
-        document.getElementById('btn-back').classList.add('hidden');
+        // Cleanup Cropper
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+
+        // Reset Data
+        frontImageBlob = null;
+        backImageBlob = null;
         document.getElementById('manual-input').value = "";
-        document.getElementById('status-msg').innerText = "";
+        document.getElementById('btn-save').disabled = false;
+        document.getElementById('btn-save').innerText = "Save Both Images";
+
+        // Reset UI Flow
+        currentPhase = 'front';
+        instructionText.innerText = "Please point to FRONT side.";
+        btnCapture.innerText = "Capture Photo";
+        
+        qrSection.classList.add('hidden');
+        cropSection.classList.add('hidden');
+        cameraSection.classList.remove('hidden');
+        
+        // Restart Camera
         startCamera();
     }
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+        // Check if showDirectoryPicker exists (mostly PC Chrome/Edge)
+        if (!window.showDirectoryPicker) {
+            console.log("PC Persistent saving not supported in this browser (Mobile/Safari). Will use downloads.");
+        }
+        startCamera();
+    });
 </script>
 
 </body>
