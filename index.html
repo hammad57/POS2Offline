@@ -2,426 +2,405 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Advanced License Scanner</title>
-    
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hammad's Professional Card Vault</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; margin: 0; padding: 10px; background-color: #f0f2f5; color: #333; overscroll-behavior: contain; }
-        h2 { margin-top: 10px; font-size: 1.4rem; color: #007bff; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0px 5px 15px rgba(0,0,0,0.1); }
-        
-        /* Camera & Video Area */
-        #camera-container { position: relative; width: 100%; max-width: 400px; margin: 0 auto 15px auto; overflow: hidden; border-radius: 10px; border: 3px solid #ccc; line-height: 0; /* remove video bottom gap */ }
-        video { width: 100%; height: auto; background-color: black; }
-        
-        /* Flash Icon Styling */
-        #flash-toggle { position: absolute; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.6); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background 0.3s; }
-        #flash-toggle:hover { background: rgba(0, 0, 0, 0.8); }
-        #flash-toggle.on { color: #ffeb3b; background: rgba(255, 255, 255, 0.3); box-shadow: 0 0 10px #ffeb3b; }
-
-        /* Cropping Area */
-        #crop-container { width: 100%; max-width: 400px; margin: 0 auto 15px auto; display: none; /* Hidden initially */ }
-        #image-to-crop { max-width: 100%; display: block; }
-        
-        /* Buttons */
-        button { background-color: #007bff; color: white; border: none; padding: 12px 20px; margin: 5px 0; cursor: pointer; border-radius: 8px; font-size: 16px; font-weight: bold; width: 100%; transition: background-color 0.2s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
-        button:hover { background-color: #0056b3; }
-        button:active { transform: scale(0.98); }
-        button:disabled { background-color: #aaa; cursor: not-allowed; }
-        button.reset-btn { background-color: #dc3545; margin-top: 15px; }
-        button.reset-btn:hover { background-color: #a71d2a; }
-        button.success-btn { background-color: #28a745; }
-        button.success-btn:hover { background-color: #1e7e34; }
-
-        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        input[type="text"]:focus { border-color: #007bff; outline: none; }
-        
-        .hidden { display: none !important; }
-        .status { margin: 15px 0; font-weight: bold; color: #28a745; padding: 10px; border-radius: 8px; background-color: #e6fffa; display: none;}
-        #reader { width: 100%; border-radius: 10px; overflow: hidden; border: 2px solid #ccc;}
-
-        /* Mobile specific adjustments */
-        @media (max-width: 600px) {
-            .container { padding: 10px; border-radius: 10px; }
-            h2 { font-size: 1.2rem; }
-            button { padding: 15px; font-size: 17px; }
-        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
 
-<div class="container">
-    <h2>License Card Scanner</h2>
-    
-    <div id="status-msg" class="status"></div>
-
-    <div id="camera-section">
-        <div id="camera-container">
-            <button id="flash-toggle" title="Toggle Flash" onclick="toggleFlash()">⚡</button>
-            <video id="video" autoplay playsinline></video>
+    <nav class="bg-indigo-600 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-vault text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-wider">Card Vault</h1>
+            </div>
+            <div>
+                <button id="authBtn" class="bg-indigo-500 hover:bg-indigo-400 px-4 py-2 rounded text-sm font-medium transition shadow">
+                    <i class="fa-brands fa-google mr-2"></i> Login
+                </button>
+                <span id="userEmail" class="ml-3 text-sm hidden sm:inline-block font-light"></span>
+            </div>
         </div>
-        <button id="btn-capture" onclick="takePhoto()">Capture Photo</button>
-        <p id="camera-instruction" style="font-weight: bold; color: #555;">Please point to FRONT side.</p>
-    </div>
+    </nav>
 
-    <div id="crop-section" class="hidden">
-        <h3 style="margin-top:0;">Adjust & Crop</h3>
-        <div id="crop-container">
-            <img id="image-to-crop" src="" alt="Temp capture">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center text-slate-500 py-10" id="loadingText">
+                <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                <p>Cards load ho rahay hain...</p>
+            </div>
         </div>
-        <button class="success-btn" onclick="finalizeCrop()">Done Cropping</button>
+    </main>
+
+    <button id="addCardBtn" class="fixed bottom-8 right-8 bg-indigo-600 text-white w-14 h-14 rounded-full shadow-2xl hover:bg-indigo-700 hover:scale-105 transition-all text-2xl flex items-center justify-center z-40">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <div id="addModal" class="modal fixed inset-0 bg-black bg-opacity-60 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center z-10">
+                <h2 class="text-xl font-bold text-slate-800">Add New Card</h2>
+                <button id="closeAddModal" class="text-slate-400 hover:text-red-500 transition text-2xl">&times;</button>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <button id="startQrBtn" class="w-full bg-slate-800 text-white py-2 rounded hover:bg-slate-700 transition">
+                        <i class="fa-solid fa-qrcode mr-2"></i> Scan QR Code
+                    </button>
+                    <div id="reader" class="mt-3 hidden"></div>
+                    <p id="qrResult" class="text-xs text-green-600 mt-2 font-medium hidden"></p>
+                </div>
+
+                <form id="addCardForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Card Type</label>
+                        <select id="cardType" class="w-full border rounded p-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="payment">Payment Card</option>
+                            <option value="visiting">Visiting Card</option>
+                            <option value="cnic">CNIC</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div id="dynamicFields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        </div>
+
+                    <div class="border-t pt-4 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Front Picture</label>
+                            <input type="file" id="frontPic" accept="image/*" class="w-full text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Back Picture</label>
+                            <input type="file" id="backPic" accept="image/*" class="w-full text-sm">
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t flex justify-end">
+                        <button type="submit" id="saveCardBtn" class="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700 transition">Save Card</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <div id="qr-section" class="hidden">
-        <h3>Step 3: Scan QR or Enter No.</h3>
-        <div id="reader"></div>
-        <input type="text" id="manual-input" placeholder="Enter License Number (e.g., 1234567)">
-        <button class="success-btn" id="btn-save" onclick="processSave()">Save Both Images</button>
-        <button class="reset-btn" onclick="resetApp()">Reset / Start Over</button>
+    <div id="viewModal" class="modal fixed inset-0 bg-black bg-opacity-60 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center z-10">
+                <h2 id="viewCardTitle" class="text-xl font-bold text-indigo-700">Card Details</h2>
+                <button id="closeViewModal" class="text-slate-400 hover:text-red-500 transition text-2xl">&times;</button>
+            </div>
+            <div id="viewCardContent" class="p-6 space-y-3">
+                </div>
+        </div>
     </div>
 
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-<script>
-    // State variables
-    let currentPhase = 'front'; // front, front-cropping, back, back-cropping, qr-save
-    let frontImageBlob = null;
-    let backImageBlob = null;
-    let directoryHandle = null; // for PC persistent folder
-    let html5QrcodeScanner = null;
-    let stream = null;
-    let videoTrack = null; // for flash control
-    let cropper = null; // cropper instance
+        // Your Firebase config (User requested *********)
+        const firebaseConfig = *********;
 
-    // DOM Elements
-    const video = document.getElementById('video');
-    const flashBtn = document.getElementById('flash-toggle');
-    const cameraSection = document.getElementById('camera-section');
-    const instructionText = document.getElementById('camera-instruction');
-    const btnCapture = document.getElementById('btn-capture');
-    
-    const cropSection = document.getElementById('crop-section');
-    const cropContainer = document.getElementById('crop-container');
-    const imageToCrop = document.getElementById('image-to-crop');
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-    const qrSection = document.getElementById('qr-section');
-    const statusMsg = document.getElementById('status-msg');
+        let currentUser = null;
+        const ADMIN_EMAIL = 'mysw786@gmail.com';
+        let html5QrcodeScanner = null;
 
-    // Utility to show status
-    function showStatus(text, isError = false) {
-        statusMsg.innerText = text;
-        statusMsg.style.display = 'block';
-        statusMsg.style.color = isError ? '#dc3545' : '#28a745';
-        statusMsg.style.backgroundColor = isError ? '#fff5f5' : '#e6fffa';
-        if(!isError) setTimeout(() => statusMsg.style.display = 'none', 4000);
-    }
+        // UI Elements
+        const authBtn = document.getElementById('authBtn');
+        const userEmailSpan = document.getElementById('userEmail');
+        const cardsContainer = document.getElementById('cardsContainer');
+        const loadingText = document.getElementById('loadingText');
+        const addCardBtn = document.getElementById('addCardBtn');
+        const addModal = document.getElementById('addModal');
+        const closeAddModal = document.getElementById('closeAddModal');
+        const cardTypeSelect = document.getElementById('cardType');
+        const dynamicFields = document.getElementById('dynamicFields');
+        const addCardForm = document.getElementById('addCardForm');
+        const viewModal = document.getElementById('viewModal');
+        const closeViewModal = document.getElementById('closeViewModal');
+        const viewCardContent = document.getElementById('viewCardContent');
+        const viewCardTitle = document.getElementById('viewCardTitle');
 
-    // --- FLASH / TORCH CONTROL ---
-    async function toggleFlash() {
-        if (!videoTrack) return;
-        
-        try {
-            const capabilities = videoTrack.getCapabilities();
-            // Check if device supports torch
-            if (!capabilities.torch) {
-                showStatus("Flash not supported on this camera.", true);
-                flashBtn.style.display = 'none'; // hide if not supported
+        // ==== Authentication ====
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                authBtn.innerHTML = '<i class="fa-solid fa-right-from-bracket mr-2"></i> Logout';
+                userEmailSpan.textContent = user.email;
+                userEmailSpan.classList.remove('hidden');
+            } else {
+                currentUser = null;
+                authBtn.innerHTML = '<i class="fa-brands fa-google mr-2"></i> Login';
+                userEmailSpan.textContent = '';
+                userEmailSpan.classList.add('hidden');
+            }
+        });
+
+        authBtn.addEventListener('click', () => {
+            if (currentUser) {
+                signOut(auth);
+            } else {
+                signInWithPopup(auth, provider).catch(err => alert("Login Error: " + err.message));
+            }
+        });
+
+        // ==== Form Fields Generator ====
+        const fieldTemplates = {
+            payment: `
+                <div class="col-span-full"><input type="text" id="f_title" placeholder="Title (e.g. Meezan Bank)" class="w-full border p-2 rounded" required></div>
+                <div class="col-span-full"><input type="text" id="f_acc_name" placeholder="Card Holder Name" class="w-full border p-2 rounded" required></div>
+                <div class="col-span-full"><input type="text" id="f_acc_num" placeholder="Account / Card Number" class="w-full border p-2 rounded" required></div>
+                <div><label class="text-xs text-gray-500">Issue Date</label><input type="date" id="f_issue" class="w-full border p-2 rounded"></div>
+                <div><label class="text-xs text-gray-500">Expiry Date</label><input type="date" id="f_expiry" class="w-full border p-2 rounded"></div>
+                <div><input type="text" id="f_sec_date" placeholder="Security Date (e.g. 01/22)" class="w-full border p-2 rounded"></div>
+                <div><input type="password" id="f_sec_code" placeholder="Security Code (CVV)" class="w-full border p-2 rounded"></div>
+            `,
+            visiting: `
+                <div class="col-span-full"><input type="text" id="f_title" placeholder="Title / Company" class="w-full border p-2 rounded" required></div>
+                <div class="col-span-full"><input type="text" id="f_name" placeholder="Person Name" class="w-full border p-2 rounded" required></div>
+                <div><input type="text" id="f_num1" placeholder="Contact Number 1" class="w-full border p-2 rounded"></div>
+                <div><input type="text" id="f_num2" placeholder="Contact Number 2" class="w-full border p-2 rounded"></div>
+                <div><input type="text" id="f_num3" placeholder="Contact Number 3" class="w-full border p-2 rounded"></div>
+                <div><input type="email" id="f_email" placeholder="Email Address" class="w-full border p-2 rounded"></div>
+                <div class="col-span-full"><input type="text" id="f_location" placeholder="Location (Manual Type)" class="w-full border p-2 rounded"></div>
+            `,
+            cnic: `
+                <div class="col-span-full"><input type="text" id="f_title" placeholder="Title (e.g. My CNIC)" class="w-full border p-2 rounded" required></div>
+                <div class="col-span-full"><input type="text" id="f_name" placeholder="Full Name" class="w-full border p-2 rounded" required></div>
+                <div class="col-span-full"><input type="text" id="f_cnic" placeholder="CNIC Number (e.g. 35202-XXXXXXX-X)" class="w-full border p-2 rounded" required></div>
+                <div><label class="text-xs text-gray-500">Date of Birth</label><input type="date" id="f_dob" class="w-full border p-2 rounded"></div>
+                <div></div> <div><label class="text-xs text-gray-500">Issue Date</label><input type="date" id="f_issue" class="w-full border p-2 rounded"></div>
+                <div><label class="text-xs text-gray-500">Expiry Date</label><input type="date" id="f_expiry" class="w-full border p-2 rounded"></div>
+            `,
+            other: `
+                <div class="col-span-full"><input type="text" id="f_title" placeholder="Title" class="w-full border p-2 rounded" required></div>
+                <div class="col-span-full"><input type="text" id="f_name" placeholder="Name" class="w-full border p-2 rounded"></div>
+                <div><input type="text" id="f_num" placeholder="Contact Number" class="w-full border p-2 rounded"></div>
+                <div><input type="email" id="f_email" placeholder="Email" class="w-full border p-2 rounded"></div>
+                <div class="col-span-full"><input type="text" id="f_address" placeholder="Address" class="w-full border p-2 rounded"></div>
+                <div><label class="text-xs text-gray-500">Issue Date</label><input type="date" id="f_issue" class="w-full border p-2 rounded"></div>
+                <div><label class="text-xs text-gray-500">Expiry Date</label><input type="date" id="f_expiry" class="w-full border p-2 rounded"></div>
+                <div class="col-span-full"><textarea id="f_remarks" placeholder="Remarks" class="w-full border p-2 rounded"></textarea></div>
+            `
+        };
+
+        const renderFormFields = () => {
+            dynamicFields.innerHTML = fieldTemplates[cardTypeSelect.value];
+        };
+        cardTypeSelect.addEventListener('change', renderFormFields);
+        renderFormFields(); // Initial render
+
+        // ==== Modals Logic ====
+        addCardBtn.onclick = () => addModal.classList.add('active');
+        closeAddModal.onclick = () => { addModal.classList.remove('active'); stopScanner(); };
+        closeViewModal.onclick = () => viewModal.classList.remove('active');
+
+        // ==== QR Scanner ====
+        const startQrBtn = document.getElementById('startQrBtn');
+        const readerDiv = document.getElementById('reader');
+        const qrResult = document.getElementById('qrResult');
+
+        startQrBtn.onclick = (e) => {
+            e.preventDefault();
+            readerDiv.classList.remove('hidden');
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+            html5QrcodeScanner.render((decodedText) => {
+                qrResult.classList.remove('hidden');
+                qrResult.innerText = "Scanned Data: " + decodedText;
+                // Basic auto-fill title to show functionality
+                if(document.getElementById('f_title')) document.getElementById('f_title').value = decodedText;
+                stopScanner();
+            }, (err) => { /* ignored */ });
+        };
+
+        const stopScanner = () => {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+                readerDiv.classList.add('hidden');
+            }
+        };
+
+        // ==== Image Upload Helper ====
+        const uploadImage = async (file, path) => {
+            if (!file) return null;
+            const storageRef = ref(storage, `cards/${Date.now()}_${path}`);
+            await uploadBytes(storageRef, file);
+            return await getDownloadURL(storageRef);
+        };
+
+        // ==== Save Card Data ====
+        addCardForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveCardBtn');
+            saveBtn.innerText = "Saving..."; saveBtn.disabled = true;
+
+            try {
+                const type = cardTypeSelect.value;
+                let data = { type, createdAt: new Date() };
+
+                // Get values dynamically based on IDs created
+                const inputs = dynamicFields.querySelectorAll('input, textarea');
+                inputs.forEach(input => {
+                    data[input.id.replace('f_', '')] = input.value;
+                });
+
+                // Handle Images
+                const frontFile = document.getElementById('frontPic').files[0];
+                const backFile = document.getElementById('backPic').files[0];
+                
+                data.frontPicUrl = await uploadImage(frontFile, 'front');
+                data.backPicUrl = await uploadImage(backFile, 'back');
+
+                await addDoc(collection(db, "cards"), data);
+                
+                addCardForm.reset();
+                addModal.classList.remove('active');
+                renderFormFields();
+                alert("Card successfully save ho gaya!");
+            } catch (error) {
+                alert("Error saving card: " + error.message);
+            } finally {
+                saveBtn.innerText = "Save Card"; saveBtn.disabled = false;
+            }
+        };
+
+        // ==== Fetch and Display Cards ====
+        onSnapshot(collection(db, "cards"), (snapshot) => {
+            cardsContainer.innerHTML = '';
+            if (snapshot.empty) {
+                cardsContainer.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10">Koi card majood nahi. "+" button dabayein!</div>';
                 return;
             }
 
-            const currentTorchState = videoTrack.getSettings().torch || false;
-            const newTorchState = !currentTorchState;
-
-            await videoTrack.applyConstraints({
-                advanced: [{ torch: newTorchState }]
-            });
-
-            // Update UI
-            if (newTorchState) {
-                flashBtn.classList.add('on');
-            } else {
-                flashBtn.classList.remove('on');
-            }
-
-        } catch (err) {
-            console.error("Flash error:", err);
-            showStatus("Could not control flash.", true);
-        }
-    }
-
-    // --- CAMERA INITIALIZATION ---
-    async function startCamera() {
-        showStatus("Opening camera...");
-        try {
-            // Stop existing tracks if any
-            if(stream) stream.getTracks().forEach(track => track.stop());
-
-            // Prefer back camera, require good resolution
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'environment',
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
-                } 
-            });
-            video.srcObject = stream;
-            videoTrack = stream.getVideoTracks()[0];
-
-            // Check flash capability after camera starts
-            setTimeout(() => {
-                const capabilities = videoTrack.getCapabilities();
-                if(!capabilities.torch) {
-                    flashBtn.style.display = 'none'; // Hide if not available
-                } else {
-                    flashBtn.style.display = 'flex';
+            snapshot.forEach((docSnap) => {
+                const card = docSnap.data();
+                const id = docSnap.id;
+                
+                // Determine display primary/secondary values based on type
+                let mainNumber = card.acc_num || card.cnic || card.num1 || card.num || "N/A";
+                let validityStr = "";
+                if (card.issue || card.expiry) {
+                    validityStr = `${card.issue || 'N/A'} - ${card.expiry || 'N/A'}`;
                 }
-            }, 500);
 
-        } catch (err) {
-            console.error(err);
-            showStatus("Camera Access Denied or Not Available.", true);
-            alert("Please allow camera permissions.");
-        }
-    }
+                // Card Element Creation
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'bg-white rounded-xl shadow border border-slate-100 hover:shadow-lg hover:border-indigo-200 transition p-5 relative cursor-pointer flex flex-col justify-between overflow-hidden group';
+                
+                // Card UI Layout
+                cardDiv.innerHTML = `
+                    <div class="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg">${card.type}</div>
+                    <button class="delete-btn absolute bottom-4 right-4 text-slate-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100" data-id="${id}">
+                        <i class="fa-solid fa-trash-can text-xl"></i>
+                    </button>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-1 leading-tight title-click" data-id="${id}">${card.title}</h3>
+                        <p class="text-sm font-mono text-slate-600 bg-slate-50 p-2 rounded border border-slate-100 mb-3">${mainNumber}</p>
+                    </div>
+                    ${validityStr ? `<div class="text-xs text-slate-500 flex items-center"><i class="fa-regular fa-calendar mr-2"></i> ${validityStr}</div>` : ''}
+                `;
 
-    // --- CAPTURE & CROP FLOW ---
+                // Handle click to view
+                cardDiv.querySelector('.title-click').addEventListener('click', () => showCardDetails(card));
+                
+                // Handle Delete
+                cardDiv.querySelector('.delete-btn').addEventListener('click', async (e) => {
+                    e.stopPropagation(); // Prevent opening modal
+                    if(confirm("Kiya aap waqai is card ko delete karna chahte hain?")) {
+                        await deleteDoc(doc(db, "cards", id));
+                    }
+                });
 
-    // 1. Take initial full photo
-    function takePhoto() {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        
-        // Convert canvas to base64 for the cropper tool
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-        
-        // Turn off camera temporarily
-        if(stream) stream.getTracks().forEach(track => track.stop());
-        flashBtn.classList.remove('on'); // visual reset
-
-        // Move to cropping phase
-        openCropper(dataUrl);
-    }
-
-    // 2. Open Cropper UI
-    function openCropper(imageDataUrl) {
-        cameraSection.classList.add('hidden');
-        cropSection.classList.remove('hidden');
-        cropContainer.style.display = 'block';
-        
-        imageToCrop.src = imageDataUrl;
-
-        // Initialize Cropper.js
-        if (cropper) cropper.destroy(); // clear previous instance
-        
-        cropper = new Cropper(imageToCrop, {
-            viewMode: 1, // Restrict crop box within the canvas
-            dragMode: 'move', // Default action when clicking outside crop box
-            autoCropArea: 0.8, // Define the automatic crop area size
-            restore: false,
-            guides: true,
-            center: true,
-            highlight: false,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: false,
-        });
-    }
-
-    // 3. Finalize Crop, store blob, decide next step
-    function finalizeCrop() {
-        if (!cropper) return;
-
-        // Get high quality cropped canvas
-        const croppedCanvas = cropper.getCroppedCanvas({
-            maxWidth: 2048, // Limit max size for performance/storage
-            maxHeight: 2048,
-            imageSmoothingHigh: true,
+                cardsContainer.appendChild(cardDiv);
+            });
         });
 
-        croppedCanvas.toBlob((blob) => {
-            cropper.destroy();
-            cropper = null;
-            cropSection.classList.add('hidden');
+        // ==== Show Card Details ====
+        const showCardDetails = (card) => {
+            viewCardTitle.innerText = card.title;
+            let html = `<div class="space-y-2 text-sm text-slate-700">`;
+            
+            // Helper function to render a row
+            const renderRow = (label, value) => {
+                if (value) html += `<div class="flex justify-between border-b pb-1"><span class="font-semibold">${label}:</span> <span>${value}</span></div>`;
+            };
 
-            if (currentPhase === 'front') {
-                frontImageBlob = blob;
-                showStatus("FRONT side cropped successfully.");
+            // Switch based on card type
+            if (card.type === 'payment') {
+                renderRow('Card Holder', card.acc_name);
+                renderRow('Account/Card #', card.acc_num);
+                renderRow('Issue Date', card.issue);
+                renderRow('Expiry Date', card.expiry);
+                renderRow('Security Date', card.sec_date);
                 
-                // Set up for BACK side
-                currentPhase = 'back';
-                instructionText.innerText = "Please point to BACK side.";
-                btnCapture.innerText = "Capture BACK Side";
-                cameraSection.classList.remove('hidden');
-                startCamera(); // restart camera for back
-            } 
-            else if (currentPhase === 'back') {
-                backImageBlob = blob;
-                showStatus("BACK side cropped successfully.");
-                
-                // Move to QR & Save phase
-                currentPhase = 'qr-save';
-                cameraSection.classList.add('hidden');
-                qrSection.classList.remove('hidden');
-                startQRScanner();
+                // Auth Check for Security Code
+                let secCodeStr = "🔒 Login as mysw786@gmail.com required";
+                if (currentUser && currentUser.email === ADMIN_EMAIL) {
+                    secCodeStr = `<span class="font-mono bg-red-100 text-red-700 px-2 rounded">${card.sec_code}</span>`;
+                }
+                html += `<div class="flex justify-between border-b pb-1"><span class="font-semibold text-red-600">Security Code:</span> <span>${secCodeStr}</span></div>`;
+            
+            } else if (card.type === 'visiting') {
+                renderRow('Name', card.name);
+                renderRow('Contact 1', card.num1);
+                renderRow('Contact 2', card.num2);
+                renderRow('Contact 3', card.num3);
+                renderRow('Email', card.email);
+                renderRow('Location', card.location);
+            
+            } else if (card.type === 'cnic') {
+                renderRow('Full Name', card.name);
+                renderRow('CNIC Number', card.cnic);
+                renderRow('Date of Birth', card.dob);
+                renderRow('Issue Date', card.issue);
+                renderRow('Expiry Date', card.expiry);
+            
+            } else if (card.type === 'other') {
+                renderRow('Name', card.name);
+                renderRow('Contact', card.num);
+                renderRow('Email', card.email);
+                renderRow('Address', card.address);
+                renderRow('Issue Date', card.issue);
+                renderRow('Expiry Date', card.expiry);
+                renderRow('Remarks', card.remarks);
             }
-        }, 'image/jpeg', 0.9);
-    }
 
-    // --- STEP 3: QR SCANNER & PERSISTENT SAVING ---
+            html += `</div>`;
 
-    function startQRScanner() {
-        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-    }
-
-    function onScanSuccess(decodedText, decodedResult) {
-        document.getElementById('manual-input').value = decodedText;
-        showStatus("QR Code Scanned!");
-        html5QrcodeScanner.clear(); // Stop scanning after success
-    }
-
-    function onScanFailure(error) { /* Ignored */ }
-
-    // PC Persistent Folder Saving Logic
-    async function getPersistentFolder() {
-        if (!window.showDirectoryPicker) return null; // Not PC/Supported
-
-        // Try using existing handle if available
-        if (directoryHandle) {
-            // Verify permission
-            const opt = { mode: 'readwrite' };
-            if ((await directoryHandle.queryPermission(opt)) === 'granted') {
-                return directoryHandle;
+            // Add Images if they exist
+            if (card.frontPicUrl || card.backPicUrl) {
+                html += `<div class="mt-4 grid grid-cols-2 gap-2">`;
+                if (card.frontPicUrl) html += `<div><p class="text-xs text-center mb-1">Front</p><a href="${card.frontPicUrl}" target="_blank"><img src="${card.frontPicUrl}" class="rounded border shadow-sm w-full object-cover h-32"></a></div>`;
+                if (card.backPicUrl) html += `<div><p class="text-xs text-center mb-1">Back</p><a href="${card.backPicUrl}" target="_blank"><img src="${card.backPicUrl}" class="rounded border shadow-sm w-full object-cover h-32"></a></div>`;
+                html += `</div>`;
             }
-            if ((await directoryHandle.requestPermission(opt)) === 'granted') {
-                return directoryHandle;
-            }
-            // If denied, reset and ask again below
-            directoryHandle = null; 
-        }
 
-        try {
-            // Ask user to pick a folder (first time)
-            showStatus("Please select a folder to save licenses...");
-            directoryHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-            showStatus("Folder selected. Saving will be automatic now.");
-            return directoryHandle;
-        } catch (err) {
-            console.error("Folder picker cancelled or error:", err);
-            showStatus("Folder selection cancelled. Using standard download.", true);
-            return null;
-        }
-    }
-
-    async function saveToFileSystem(dirHandle, blob, filename) {
-        const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
-        const writable = await fileHandle.createWritable();
-        await writable.write(blob);
-        await writable.close();
-    }
-
-    // Mobile Fallback: Direct Download
-    function downloadFallback(blob, filename) {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        // Important: clean up memory after a delay
-        setTimeout(() => URL.revokeObjectURL(link.href), 100); 
-    }
-
-    async function processSave() {
-        const licenseNo = document.getElementById('manual-input').value.trim();
-        // Basic validation: must exist, no special characters that break filenames
-        if (!licenseNo || /[<>:"\/\\|?*]/.test(licenseNo)) {
-            alert("Please enter a valid License Number (no special characters).");
-            return;
-        }
-
-        document.getElementById('btn-save').disabled = true;
-        document.getElementById('btn-save').innerText = "Saving...";
-
-        const frontName = `${licenseNo} F.jpg`;
-        const backName = `${licenseNo} B.jpg`;
-
-        // Check PC vs Mobile saving
-        const pcFolderHandle = await getPersistentFolder();
-
-        if (pcFolderHandle) {
-            try {
-                await saveToFileSystem(pcFolderHandle, frontImageBlob, frontName);
-                await saveToFileSystem(pcFolderHandle, backImageBlob, backName);
-                showStatus(`Saved successfully to folder: ${licenseNo}`);
-            } catch (err) {
-                console.error("Save error:", err);
-                showStatus("Error saving to folder. Trying direct download.", true);
-                downloadFallback(frontImageBlob, frontName);
-                downloadFallback(backImageBlob, backName);
-            }
-        } else {
-            // Mobile ya logic fail hone par manual downloads
-            downloadFallback(frontImageBlob, frontName);
-            downloadFallback(backImageBlob, backName);
-            showStatus(`Images downloaded to Downloads folder.`);
-        }
-
-        // Auto restart after saving
-        setTimeout(resetApp, 3000);
-    }
-
-    // Reset everything for a new card
-    function resetApp() {
-        // Cleanup flash UI
-        flashBtn.classList.remove('on');
-        flashBtn.style.display = 'none';
-
-        // Cleanup QR Scanner
-        if (html5QrcodeScanner) {
-            try { html5QrcodeScanner.clear(); } catch(e){}
-        }
-        // Cleanup Cropper
-        if (cropper) {
-            cropper.destroy();
-            cropper = null;
-        }
-
-        // Reset Data
-        frontImageBlob = null;
-        backImageBlob = null;
-        document.getElementById('manual-input').value = "";
-        document.getElementById('btn-save').disabled = false;
-        document.getElementById('btn-save').innerText = "Save Both Images";
-
-        // Reset UI Flow
-        currentPhase = 'front';
-        instructionText.innerText = "Please point to FRONT side.";
-        btnCapture.innerText = "Capture Photo";
-        
-        qrSection.classList.add('hidden');
-        cropSection.classList.add('hidden');
-        cameraSection.classList.remove('hidden');
-        
-        // Restart Camera
-        startCamera();
-    }
-
-    // Initialize on load
-    window.addEventListener('load', () => {
-        // Check if showDirectoryPicker exists (mostly PC Chrome/Edge)
-        if (!window.showDirectoryPicker) {
-            console.log("PC Persistent saving not supported in this browser (Mobile/Safari). Will use downloads.");
-        }
-        startCamera();
-    });
-</script>
-
+            viewCardContent.innerHTML = html;
+            viewModal.classList.add('active');
+        };
+    </script>
 </body>
 </html>
