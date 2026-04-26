@@ -114,8 +114,10 @@
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-        // Your Firebase config (User requested *********)
-        const firebaseConfig = *********;
+        // Updated Firebase Config
+        const firebaseConfig = { 
+            databaseURL: "https://own-live-steam-web-default-rtdb.firebaseio.com/" 
+        };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
